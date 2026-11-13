@@ -12,7 +12,7 @@ SwarScribe is an offline-first AI dictation system that does the job of Wispr Fl
 [![Release](https://img.shields.io/github/v/release/saifmodan2006/swarscribe)](https://github.com/saifmodan2006/swarscribe/releases)
 [![CI](https://github.com/saifmodan2006/swarscribe/actions/workflows/ci.yml/badge.svg)](https://github.com/saifmodan2006/swarscribe/actions/workflows/ci.yml)
 [![Android](https://github.com/saifmodan2006/swarscribe/actions/workflows/android.yml/badge.svg)](https://github.com/saifmodan2006/swarscribe/actions/workflows/android.yml)
-![Tests](https://img.shields.io/badge/tests-54%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-70%20passing-brightgreen)
 
 **[Try the live demo in your browser](https://saifmodan2006.github.io/swarscribe/web/)** · No install, no sign-up, nothing uploaded. If SwarScribe saves you typing, a star helps the next person find it.
 
@@ -53,9 +53,9 @@ You get:   The meeting is on Tuesday at five, and please check
 | **History and edit stats (v0.2)** | Undo for dictation sessions, Markdown export, and every result reports how many edits the pipeline just saved you. |
 | **API and web demo included** | A FastAPI service and a zero-backend browser demo ship in the repo. |
 
-## What is new in v0.5
+## What is new in v0.6: SwarScribe, everywhere
 
-Made for people, not just for tests: a live browser demo on GitHub Pages, a proper README with badges that reflect the real build status, `swarscribe dict` commands so teaching it your words takes one line, `swarscribe history` with undo and Markdown export from the terminal, a global hotkey mode for the desktop app, and a social preview card so the project looks like itself when shared. See [CHANGELOG.md](CHANGELOG.md).
+Streaming dictation that lands words while you speak. A Telegram voice-note bot (send a note, get clean text) and a WhatsApp webhook. A meeting recorder that turns a WAV into timestamped notes. Hinglish mode that respects the Hindi and English mix. Shareable word packs. A one-click Linux binary attached to the release, with Windows installer scripts. A system tray app. A Chrome extension, VS Code and Obsidian integrations. A floating mic bubble on Android. And published, reproducible benchmarks in [docs/BENCHMARKS.md](docs/BENCHMARKS.md): both local engines scored zero word errors on the sample clip at 5 to 8x real time on a small CPU. See [CHANGELOG.md](CHANGELOG.md).
 
 ## Who it is for
 

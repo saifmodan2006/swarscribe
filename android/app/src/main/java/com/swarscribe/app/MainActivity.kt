@@ -67,6 +67,34 @@ class MainActivity : AppCompatActivity() {
                 )
             )
         }
+
+        findViewById<Button>(R.id.bubbleButton).setOnClickListener {
+            toggleBubble()
+        }
+
+        if (intent.getBooleanExtra(EXTRA_FROM_BUBBLE, false)) {
+            status.setText(R.string.kb_listening)
+            engine?.start()
+        }
+    }
+
+    private fun toggleBubble() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M
+            && !android.provider.Settings.canDrawOverlays(this)
+        ) {
+            startActivity(
+                android.content.Intent(
+                    android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    android.net.Uri.parse("package:$packageName")
+                )
+            )
+            return
+        }
+        startService(android.content.Intent(this, BubbleService::class.java))
+    }
+
+    companion object {
+        const val EXTRA_FROM_BUBBLE = "from_bubble"
     }
 
     private fun startServerRecording(status: TextView) {

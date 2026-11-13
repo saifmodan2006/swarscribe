@@ -3,6 +3,7 @@
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application
         android:allowBackup="true"
@@ -33,5 +34,10 @@
                 android:name="android.view.im"
                 android:resource="@xml/method" />
         </service>
+
+        <!-- Floating mic bubble: one tap to dictate from any app. -->
+        <service
+            android:name=".BubbleService"
+            android:exported="false" />
     </application>
 </manifest>

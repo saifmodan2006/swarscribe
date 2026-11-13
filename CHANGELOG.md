@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.6.0, 2026-11-13
+
+### Everywhere release
+- **Streaming dictation** (`streaming.py`): pause-segmented live transcription with partial and final events, verified on real speech streamed in chunks.
+- **Voice-note bots** (`bots/`): Telegram bot that turns voice notes into clean text (tested end to end with fakes), plus a WhatsApp Cloud API webhook with tested parsing and reply building.
+- **Meeting recorder** (`swarscribe meeting-record`): a WAV becomes timestamped Markdown notes with summary, decisions and action items. No fake speaker guessing.
+- **Hinglish mode** (`clean --hinglish`, docs/HINGLISH.md): cleanup that keeps the Hindi-English mix intact, normalizes spelling variants, removes only leading discourse fillers.
+- **Word packs** (`swarscribe packs`): export, import and share dictionaries and snippets as JSON; developer and Hinglish packs bundled.
+- **One-click installers** (`packaging/`): PyInstaller spec and build scripts for Linux and Windows plus an Inno Setup installer script. The Linux single-file binary (26 MB) is built, smoke-tested and attached to this release.
+- **System tray app** (`swarscribe tray`): tray icon with Dictate, Dashboard and Quit, via the desktop extra.
+- **Chrome extension** (`extension/`): a mic button beside any web text field, cleanup running locally in the page.
+- **VS Code and Obsidian integrations** (`integrations/`): clean selected dictation through the local CLI without leaving the editor.
+- **Android floating bubble**: overlay mic bubble service with drag, tap-to-dictate and long-press to dismiss, plus the permission flow in the app.
+- **Published benchmarks** (docs/BENCHMARKS.md): measured on a small shared CPU, faster-whisper tiny and base both scored WER 0.000 on the sample clip at 8.5x and 5.2x real time; cleanup about 63,000 words per second. Methodology and limits stated.
+- 70 tests, all passing.
+
 ## v0.5.0, 2026-11-13
 
 ### Made to be found, and to be used

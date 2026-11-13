@@ -12,4 +12,5 @@
     <string name="server_recording">Recording... tap again to send</string>
     <string name="server_sending">Sending to your desktop...</string>
     <string name="enable_keyboard">Enable the SwarScribe keyboard</string>
+    <string name="enable_bubble">Floating mic bubble (dictate from any app)</string>
 </resources>
