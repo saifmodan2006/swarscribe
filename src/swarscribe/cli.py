@@ -49,6 +49,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--style", default=None)
     p.add_argument("--app", default=None)
     p.add_argument("--code", action="store_true")
+    p.add_argument("--hinglish", action="store_true",
+                   help="Hinglish mode: cleanup tuned for Hindi + English")
     p.add_argument("--with-defaults", action="store_true")
 
     p = sub.add_parser("command", help="Apply a voice editing command")
@@ -88,6 +90,26 @@ def main(argv: list[str] | None = None) -> int:
     pr = dsub.add_parser("remove", help="Forget a word")
     pr.add_argument("heard")
 
+    p = sub.add_parser("tray", help="Run SwarScribe in the system tray")
+    p.add_argument("--engine", default="auto")
+    p.add_argument("--model", default=None)
+
+    pk = sub.add_parser("packs", help="Shareable dictionary/snippet packs")
+    pksub = pk.add_subparsers(dest="packs_cmd", required=True)
+    pksub.add_parser("list", help="List packs bundled in the repo")
+    pe = pksub.add_parser("export", help="Export your words as a pack")
+    pe.add_argument("name")
+    pe.add_argument("path")
+    pi = pksub.add_parser("import", help="Import a pack file")
+    pi.add_argument("path")
+
+    p = sub.add_parser("meeting-record",
+                       help="Turn a meeting WAV into timestamped notes")
+    p.add_argument("wav")
+    p.add_argument("--out", default="meeting-notes.md")
+    p.add_argument("--engine", default="auto")
+    p.add_argument("--model", default=None)
+
     p = sub.add_parser("history", help="Show or export dictation history")
     p.add_argument("--export", action="store_true",
                    help="Print the session as Markdown")
@@ -105,7 +127,11 @@ def main(argv: list[str] | None = None) -> int:
         result = _pipeline(args).process(
             args.text, style=args.style, app=args.app,
             code_mode=args.code)
-        print(result.text)
+        text = result.text
+        if args.hinglish:
+            from .hinglish import clean_hinglish
+            text = clean_hinglish(text)
+        print(text)
     elif args.cmd == "command":
         print(apply_command(args.text, args.do))
     elif args.cmd == "code":
@@ -154,6 +180,48 @@ def main(argv: list[str] | None = None) -> int:
             gone = config.dictionary.pop(args.heard.lower(), None)
             config.save()
             print("Removed." if gone else "Not in the dictionary.")
+    elif args.cmd == "tray":
+        from .desktop import run_desktop  # noqa: F401  (warm import)
+        from .transcribe import choose_backend
+        from .tray import run_tray
+        config = Config.load()
+        run_tray(_pipeline(args),
+                 choose_backend(args.engine, model=args.model),
+                 hotkey=config.hotkey)
+    elif args.cmd == "packs":
+        from pathlib import Path as _Path
+
+        from .packs import Pack, export_pack, import_pack
+        if args.packs_cmd == "list":
+            packs_dir = _Path(__file__).resolve().parent.parent.parent \
+                / "packs"
+            found = sorted(packs_dir.glob("*.json")) \
+                if packs_dir.exists() else []
+            if not found:
+                print("No bundled packs found.")
+            for item in found:
+                pack = Pack.load(item)
+                print(f"{pack.name}: {len(pack.dictionary)} words, "
+                      f"{len(pack.snippets)} snippets ({item.name})")
+        elif args.packs_cmd == "export":
+            config = Config.load()
+            path = export_pack(config, args.name).save(_Path(args.path))
+            print(f"Pack saved: {path}")
+        elif args.packs_cmd == "import":
+            config = Config.load()
+            pack = Pack.load(_Path(args.path))
+            added = import_pack(pack, config)
+            config.save()
+            print(f"Imported '{pack.name}': {added} new entries.")
+    elif args.cmd == "meeting-record":
+        from .meeting_recorder import save_meeting_notes
+        from .transcribe import choose_backend, transcribe_wav_bytes
+        backend = choose_backend(args.engine, model=args.model)
+        path = save_meeting_notes(
+            args.wav,
+            lambda data: transcribe_wav_bytes(data, backend=backend).text,
+            args.out)
+        print(f"Meeting notes written: {path}")
     elif args.cmd == "history":
         from .app import state_dir
         from .history import History
