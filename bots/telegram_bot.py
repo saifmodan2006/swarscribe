@@ -109,7 +109,13 @@ class VoiceNoteBot:
 def main():  # pragma: no cover - network loop
     token = os.environ["SWARSCRIBE_TELEGRAM_TOKEN"]
     api = TelegramAPI(token)
-    bot = VoiceNoteBot(api, Pipeline(), choose_backend("auto"))
+    model = os.environ.get("SWARSCRIBE_MODEL", "base")
+    try:
+        from swarscribe.transcribe import FasterWhisperBackend
+        backend = FasterWhisperBackend(model=model)
+    except Exception:
+        backend = choose_backend("auto")
+    bot = VoiceNoteBot(api, Pipeline(), backend)
     offset = 0
     print("SwarScribe bot listening. Send it a voice note.")
     while True:
