@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowScribe - Offline-First AI Dictation</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>FlowScribe</h1>
+  <p class="tag">Speak naturally. Get finished text. Nothing leaves your device.</p>
+  <p class="badges"><span>Offline first</span><span>Dual engine</span><span>Code mode</span><span>Meeting notes</span><span>No word caps</span></p>
+</header>
+
+<main>
+  <section class="card">
+    <h2>Dictate or paste a rough transcript</h2>
+    <p class="hint">Try: <em>um the meeting is on monday no wait tuesday at five comma and uh please check my portfolio</em></p>
+    <textarea id="input" rows="4" placeholder="Speak with the mic button, or paste raw dictation here..."></textarea>
+    <div class="row">
+      <button id="mic">Start mic</button>
+      <button id="clean" class="primary">Clean it up</button>
+      <label>Style
+        <select id="style">
+          <option value="">None</option>
+          <option value="formal">Formal</option>
+          <option value="casual">Casual</option>
+          <option value="email">Email</option>
+        </select>
+      </label>
+      <label><input type="checkbox" id="code"> Code mode</label>
+    </div>
+    <h3>Clean output</h3>
+    <textarea id="output" rows="4" readonly placeholder="Clean text appears here..."></textarea>
+    <div class="row">
+      <button id="copy">Copy output</button>
+      <span id="stats"></span>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Command Mode: edit by voice</h2>
+    <div class="row">
+      <button data-cmd="make it formal">Make it formal</button>
+      <button data-cmd="make it shorter">Make it shorter</button>
+      <button data-cmd="make it a list">Make it a list</button>
+      <button data-cmd="uppercase">Uppercase</button>
+    </div>
+    <p class="hint">Commands act on the clean output above. In the desktop app you say them out loud.</p>
+  </section>
+
+  <section class="grid">
+    <div class="card"><h3>Why not Wispr Flow?</h3><p>Wispr is cloud only and caps its free plan. FlowScribe runs on your machine, has no word cap, works on Linux, speaks code, turns meetings into notes, and costs nothing.</p></div>
+    <div class="card"><h3>Dual engine</h3><p>Parakeet v3 for fast English dictation, Whisper large-v3-turbo for 99 languages including Hindi and Hinglish. The pipeline picks the right one automatically.</p></div>
+    <div class="card"><h3>Private by design</h3><p>No account, no upload, no training on your voice. Your dictionary, snippets and history are plain files you own.</p></div>
+  </section>
+</main>
+
+<footer><p>FlowScribe by <a href="https://www.devbysaif.in/">Saif Modan</a> - MIT licensed - <a href="https://github.com/saifmodan2006/flowscribe">GitHub</a></p></footer>
+<script src="app.js"></script>
+</body>
+</html>

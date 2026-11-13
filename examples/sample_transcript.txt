@@ -1,0 +1,1 @@
+We discussed the launch plan for the new dictation feature in detail today. We decided to ship the offline version first. Rahul will prepare the demo by Friday. We agreed the pricing stays free for students. Priya needs to review the documentation before release.

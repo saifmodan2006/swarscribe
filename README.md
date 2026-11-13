@@ -1,0 +1,140 @@
+# FlowScribe
+
+**Speak naturally. Get finished text. Nothing leaves your device.**
+
+FlowScribe is an offline-first AI dictation system that does the job of Wispr Flow, and then keeps going: dual-engine transcription, smart cleanup, voice command editing, a dedicated code mode, meeting notes, and dictation analytics, all built from open source, all free, with no word caps and no account.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+![Privacy](https://img.shields.io/badge/privacy-local%20first-brightgreen)
+![Status](https://img.shields.io/badge/status-v0.1.0-orange)
+
+> Wispr Flow sends every word you say to the cloud, caps its free plan at 2,000 words a week, and charges for Command Mode. FlowScribe runs on your machine, has no caps, and treats those features as table stakes.
+
+## What it does
+
+Hold a hotkey, speak the way you actually talk, rambling, fillers, mid-sentence corrections and all, and FlowScribe lands clean, formatted text wherever your cursor is.
+
+```text
+You say:   um the meeting is on monday no wait tuesday at five comma
+           and uh please check my portfolio
+
+You get:   The meeting is on Tuesday at five, and please check
+           https://www.devbysaif.in/
+```
+
+## Features that go beyond Wispr Flow
+
+| Feature | What it means |
+| --- | --- |
+| **Dual-engine transcription** | NVIDIA Parakeet v3 for fast English dictation, Whisper large-v3-turbo for 99 languages. Picked automatically by language. |
+| **Offline first, private by design** | Audio, transcripts, dictionary and history never leave your machine unless you turn on a cloud option yourself. Wispr is cloud only. |
+| **No word caps, no subscription** | Dictate all day. It is MIT licensed open source. |
+| **Smart cleanup** | Fillers removed, stutters fixed, self-corrections resolved ("on Monday, no wait, Tuesday" keeps only Tuesday), spoken punctuation and lists formatted. |
+| **Command Mode, built in** | Select text and say "make it formal", "make it shorter", "make it a list". Free, not a Pro upsell. |
+| **Code Mode** | Dictate real code: "snake case user name equals five" becomes `user_name = 5`. CamelCase, PascalCase, symbols and digits included. |
+| **Per-app styles** | Formal in email, casual in chat, clean in documents, applied automatically by the app you are dictating into. |
+| **Personal dictionary that learns the shape of your life** | Your names, projects and jargon, in a plain file you own, with mis-hearing suggestions. |
+| **Snippets** | Say "my portfolio" or "my signature", get the full block. |
+| **Meeting Mode** | Dictate or paste a whole meeting, get a summary, decisions and action items. No bot joins your call. |
+| **Hinglish ready** | Whisper language routing plus cleanup tuned for mixed Hindi and English speech, the way India actually talks. |
+| **Dictation analytics** | Words dictated, speaking speed, and an honest estimate of minutes saved versus typing at 40 WPM. Stored locally, for you only. |
+| **API and web demo included** | A FastAPI service and a zero-backend browser demo ship in the repo. |
+
+Full side-by-side: [docs/COMPARISON.md](docs/COMPARISON.md)
+
+## Quick start
+
+No model download is needed to try the cleanup pipeline, the demo, the CLI text commands, the API, or the web demo.
+
+```bash
+git clone https://github.com/saifmodan2006/flowscribe.git
+cd flowscribe
+pip install -e .
+
+# Clean raw dictation text
+flowscribe clean "um the meeting is on monday no wait tuesday at five"
+
+# Voice-edit text
+flowscribe command --do "make it formal" --text "i can't make it"
+
+# Dictate code
+flowscribe code "snake case user name equals five"
+
+# Meeting notes from a transcript file
+flowscribe meeting examples/sample_transcript.txt
+
+# See it all working
+python examples/demo.py
+```
+
+Add real speech transcription when you are ready:
+
+```bash
+pip install -e ".[whisper]"     # Whisper large-v3-turbo, 99 languages
+pip install -e ".[parakeet]"    # NVIDIA Parakeet v3, fastest English
+pip install -e ".[api]"         # FastAPI service
+pip install -e ".[desktop]"     # push-to-talk + paste at cursor
+
+flowscribe transcribe recording.wav --language en
+uvicorn flowscribe.api:app --reload   # API docs at /docs
+```
+
+For the web demo, just open `web/index.html` in a browser. It runs the cleanup pipeline in JavaScript, supports mic input where the browser allows it, and needs no server.
+
+## How it works
+
+```text
+mic / audio / text in
+  -> transcription (Parakeet for speed, Whisper for languages)
+  -> cleanup (fillers, corrections, punctuation, lists)
+  -> personal dictionary -> snippets
+  -> code mode (optional) -> per-app style
+  -> optional local LLM pass (Ollama, on your machine)
+  -> typed at your cursor, or returned by the API
+  -> local analytics
+```
+
+Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · Roadmap: [docs/ROADMAP.md](docs/ROADMAP.md)
+
+## Project layout
+
+```text
+src/flowscribe/   the package: pipeline, cleanup, transcribe, codemode,
+                  commands, meeting, analytics, desktop, api, cli
+web/              zero-backend browser demo
+docs/             architecture, Wispr comparison, roadmap
+examples/         runnable demo and a sample meeting transcript
+tests/            unit tests for every core feature (stdlib unittest,
+                  also runs under pytest)
+```
+
+## Tests
+
+```bash
+python -m unittest discover -s tests -v
+# or
+pytest
+```
+
+## Built with open source
+
+- [NVIDIA Parakeet](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3) and [NeMo](https://github.com/NVIDIA/NeMo)
+- [OpenAI Whisper](https://github.com/openai/whisper) (MIT) via [faster-whisper](https://github.com/SYSTRAN/faster-whisper) and whisper.cpp
+- [FastAPI](https://fastapi.tiangolo.com/), [Ollama](https://ollama.com/) for the optional local LLM pass
+- Inspired by the open source dictation community: [Handy](https://github.com/cjpais/Handy) and [OpenWhispr](https://github.com/OpenWhispr/openwhispr), both MIT, proved local system-wide dictation works
+
+FlowScribe is an original implementation. It does not use Wispr Flow code, models, or branding beyond naming it as the reference product it improves on.
+
+## Contributing
+
+Issues and pull requests are welcome. Keep PRs small, tested, and focused, one feature or fix at a time.
+
+## Author
+
+**Saif Modan** · Python and AI Developer · Ahmedabad, India
+Portfolio: [devbysaif.in](https://www.devbysaif.in/) · LinkedIn: [saif-modan](https://www.linkedin.com/in/saif-modan) · GitHub: [@saifmodan2006](https://github.com/saifmodan2006)
+
+## License
+
+MIT. See [LICENSE](LICENSE).
