@@ -15,6 +15,9 @@ from .transcribe import transcribe_wav_bytes
 
 KEYS = {"ctrl", "alt", "shift", "win", "space", "tab", "enter", "pause"}
 ALIASES = {"cmd": "win", "escape": "esc", "control": "ctrl"}
+for _modifier in ("ctrl", "alt", "shift", "cmd"):
+    for _side in ("l", "r"):
+        ALIASES[f"{_modifier}_{_side}"] = ALIASES.get(_modifier, _modifier)
 
 
 def parse_hotkey(value: str) -> frozenset[str]:
@@ -79,13 +82,18 @@ def run_desktop(config: Config, *, shutdown: Event | None = None,
     guard = Lock()
     accepted = False
     last_edit = None
+    physical_down: dict[object, str] = {}
 
     def key_event(key, pressed, injected=False):
         nonlocal accepted
         if key is None or injected:
             return
-        key = listener.canonical(key)
-        name = key.char if isinstance(key, keyboard.KeyCode) else key.name
+        physical = getattr(key, "vk", None) or key
+        if isinstance(key, keyboard.KeyCode):
+            normalized = listener.canonical(key)
+            name = getattr(normalized, "char", None)
+        else:
+            name = key.name
         if not name:
             return
         name = ALIASES.get(name.lower(), name.lower())
@@ -93,6 +101,17 @@ def run_desktop(config: Config, *, shutdown: Event | None = None,
             cancel.set()
             return
         with guard:
+            if pressed:
+                if physical in physical_down:
+                    return
+                already_down = name in physical_down.values()
+                physical_down[physical] = name
+                if already_down:
+                    return
+            else:
+                name = physical_down.pop(physical, name)
+                if name in physical_down.values():
+                    return
             action = hotkey.update(name, pressed)
             if action == "start":
                 accepted = idle.is_set()
