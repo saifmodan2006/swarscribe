@@ -56,7 +56,7 @@ fighting the recognizer.
 
 ## Launch checklist
 
-- [ ] LinkedIn post (Saif posts, or approves the exact copy)
+- [x] LinkedIn post published 2026-11-13: https://www.linkedin.com/feed/update/urn:li:activity:7527005055250563072/ (first attempt failed on LinkedIn's PNG image upload; JPG worked)
 - [ ] Show HN submission
 - [ ] r/opensource and r/selfhosted posts
 - [x] Telegram bot live with a BotFather token, link added to README (https://t.me/swarscribe_bot, verified end to end 2026-11-13)
