@@ -76,6 +76,23 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("app", help="Run the desktop dictation app")
     p.add_argument("--engine", default="auto")
     p.add_argument("--model", default=None)
+    p.add_argument("--hotkey", action="store_true",
+                   help="Hold a global hotkey anywhere instead of Enter")
+
+    d = sub.add_parser("dict", help="Manage your personal dictionary")
+    dsub = d.add_subparsers(dest="dict_cmd", required=True)
+    dsub.add_parser("list", help="Show dictionary entries")
+    pa = dsub.add_parser("add", help="Teach a word: dict add heard Correct")
+    pa.add_argument("heard")
+    pa.add_argument("correct", nargs="+")
+    pr = dsub.add_parser("remove", help="Forget a word")
+    pr.add_argument("heard")
+
+    p = sub.add_parser("history", help="Show or export dictation history")
+    p.add_argument("--export", action="store_true",
+                   help="Print the session as Markdown")
+    p.add_argument("--undo", action="store_true",
+                   help="Remove the most recent entry")
 
     sub.add_parser("models", help="List speech models and downloads")
 
@@ -110,8 +127,49 @@ def main(argv: list[str] | None = None) -> int:
     elif args.cmd == "stats":
         print(json.dumps(Analytics().summary(), indent=2))
     elif args.cmd == "app":
-        from .app import run_app
-        run_app(engine=args.engine, model=args.model)
+        if args.hotkey:
+            from .desktop import run_desktop
+            from .transcribe import choose_backend
+            config = Config.load()
+            run_desktop(_pipeline(args),
+                        choose_backend(args.engine, model=args.model),
+                        hotkey=config.hotkey)
+        else:
+            from .app import run_app
+            run_app(engine=args.engine, model=args.model)
+    elif args.cmd == "dict":
+        config = Config.load()
+        if args.dict_cmd == "list":
+            if not config.dictionary:
+                print("Dictionary is empty. Teach it: "
+                      "swarscribe dict add devbysafe devbysaif")
+            for heard, correct in sorted(config.dictionary.items()):
+                print(f"{heard} -> {correct}")
+        elif args.dict_cmd == "add":
+            correct = " ".join(args.correct)
+            config.dictionary[args.heard.lower()] = correct
+            config.save()
+            print(f"Learned: {args.heard.lower()} -> {correct}")
+        elif args.dict_cmd == "remove":
+            gone = config.dictionary.pop(args.heard.lower(), None)
+            config.save()
+            print("Removed." if gone else "Not in the dictionary.")
+    elif args.cmd == "history":
+        from .app import state_dir
+        from .history import History
+        path = state_dir() / "history.json"
+        history = History.load(path) if path.exists() else History()
+        if args.undo:
+            gone = history.undo()
+            history.save(path)
+            print("Undone:", gone.text if gone else "nothing to undo")
+        elif args.export:
+            print(history.export_markdown())
+        else:
+            if not history.entries:
+                print("No dictations yet. Run: swarscribe app")
+            for entry in history.entries[-10:]:
+                print("-", entry.text)
     elif args.cmd == "models":
         from .models import status
         print(json.dumps(status(), indent=2))

@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.5.0, 2026-11-13
+
+### Made to be found, and to be used
+- **Live demo on GitHub Pages**: the web demo is served straight from this repo, linked at the top of the README. No install, no sign-up.
+- **README rebuilt for people**: live CI, Android and release badges, who it is for, an FAQ that answers the privacy and cost questions honestly, Android APK download instructions, and a star call to action.
+- **`swarscribe dict`**: teach the dictionary from the terminal (list, add, remove), verified end to end: a word taught in one command is applied by the next cleanup.
+- **`swarscribe history`**: recent dictations, undo, and Markdown export from the terminal.
+- **Hotkey mode**: `swarscribe app --hotkey` holds a global hotkey in any app, the original Wispr pattern, alongside the terminal mode.
+- **Social preview card** in `assets/social-preview.svg`, set as the repo's sharing image, so links to SwarScribe look like SwarScribe everywhere.
+- 54 tests, all passing.
+
 ## v0.4.0, 2026-11-13
 
 ### It actually dictates now

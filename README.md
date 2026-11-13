@@ -9,7 +9,12 @@ SwarScribe is an offline-first AI dictation system that does the job of Wispr Fl
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![Privacy](https://img.shields.io/badge/privacy-local%20first-brightgreen)
-![Status](https://img.shields.io/badge/status-v0.1.0-orange)
+[![Release](https://img.shields.io/github/v/release/saifmodan2006/swarscribe)](https://github.com/saifmodan2006/swarscribe/releases)
+[![CI](https://github.com/saifmodan2006/swarscribe/actions/workflows/ci.yml/badge.svg)](https://github.com/saifmodan2006/swarscribe/actions/workflows/ci.yml)
+[![Android](https://github.com/saifmodan2006/swarscribe/actions/workflows/android.yml/badge.svg)](https://github.com/saifmodan2006/swarscribe/actions/workflows/android.yml)
+![Tests](https://img.shields.io/badge/tests-54%20passing-brightgreen)
+
+**[Try the live demo in your browser](https://saifmodan2006.github.io/swarscribe/web/)** · No install, no sign-up, nothing uploaded. If SwarScribe saves you typing, a star helps the next person find it.
 
 > Wispr Flow sends every word you say to the cloud, caps its free plan at 2,000 words a week, and charges for Command Mode. SwarScribe runs on your machine, has no caps, and treats those features as table stakes.
 
@@ -48,17 +53,33 @@ You get:   The meeting is on Tuesday at five, and please check
 | **History and edit stats (v0.2)** | Undo for dictation sessions, Markdown export, and every result reports how many edits the pipeline just saved you. |
 | **API and web demo included** | A FastAPI service and a zero-backend browser demo ship in the repo. |
 
-## What is new in v0.4
+## What is new in v0.5
 
-SwarScribe now dictates for real, on desktop and on Android. The desktop app records push-to-talk, trims silence with a built-in VAD, transcribes with local Whisper or Parakeet models (verified end to end against a real speech sample), cleans the text, and types it at your cursor, with a local dashboard for your stats, models and dictionary. The new `android/` project adds a companion app and a system keyboard that commits cleaned text in any app, on-device or through your own desktop over your Wi-Fi. See [CHANGELOG.md](CHANGELOG.md).
+Made for people, not just for tests: a live browser demo on GitHub Pages, a proper README with badges that reflect the real build status, `swarscribe dict` commands so teaching it your words takes one line, `swarscribe history` with undo and Markdown export from the terminal, a global hotkey mode for the desktop app, and a social preview card so the project looks like itself when shared. See [CHANGELOG.md](CHANGELOG.md).
 
-Run the desktop app:
+## Who it is for
 
-```bash
-pip install "swarscribe[all]"
-swarscribe app          # press Enter, speak, Enter again, written
-swarscribe dashboard    # local dashboard API and stats
-```
+- **Writers and professionals** who think faster than they type and want emails and documents at speaking speed, privately.
+- **Developers** who want to dictate code, commit messages and docs without a cloud service listening.
+- **Students and researchers** turning lectures and voice notes into clean notes and meeting summaries.
+- **Anyone who cannot type comfortably** for long, for any reason. Voice first is an accessibility feature, not a luxury.
+- **Multilingual speakers**, especially Hinglish speakers, who mix languages the way people actually talk.
+
+## Android app
+
+The `android/` project builds a real APK in CI on every change: open the [Android workflow](https://github.com/saifmodan2006/swarscribe/actions/workflows/android.yml), pick the latest green run, and download the `swarscribe-debug-apk` artifact. Install it, enable the SwarScribe keyboard once, and dictate into any app. Details: [android/README.md](android/README.md).
+
+## FAQ
+
+**Is it really free?** Yes. MIT licensed, no accounts, no word caps, no premium tier. The speech models are open source too.
+
+**Is my voice uploaded anywhere?** No. Desktop transcription runs on your machine. The web demo uses your browser's own speech support if you allow the mic, and the cleanup runs in the page. Android server mode sends audio only to your own desktop on your own Wi-Fi.
+
+**Which languages?** Whisper covers 99 languages including Hindi. Parakeet covers English and 25 European languages, faster. Hinglish gets a language hint plus cleanup tuned for mixed speech.
+
+**Windows, Mac, Linux?** The Python app and CLI run anywhere Python 3.10+ runs. The Android app needs Android 8 or newer. iOS is on the roadmap.
+
+**How is this different from Wispr Flow?** Wispr is polished and cloud based, with a subscription and word caps on the free plan. SwarScribe is local, free, open source, and adds Code Mode, Meeting Mode, smart formats and an auto-learning dictionary. Wispr still wins on hosted polish and its iPhone app today; the honest comparison is in [docs/COMPARISON.md](docs/COMPARISON.md).
 
 ## Performance
 
