@@ -36,6 +36,47 @@ function capitalise(t) {
   return t.replace(/\bi\b/g, "I");
 }
 
+const HOUR_WORDS = { one:1, two:2, three:3, four:4, five:5, six:6, seven:7,
+  eight:8, nine:9, ten:10, eleven:11, twelve:12 };
+const NUM_WORDS = Object.assign({}, HOUR_WORDS, { thirteen:13, fourteen:14,
+  fifteen:15, sixteen:16, seventeen:17, eighteen:18, nineteen:19, twenty:20,
+  thirty:30 });
+
+function smartFormatsJS(t) {
+  // Email: "saif modan at gmail dot com" -> saifmodan@gmail.com
+  t = t.replace(/\b((?:(?!(?:is|the|my|email|address|send|please|and|to)\s)\w+\s+){0,3}(?!(?:is|the|my|email|address|send|please|and|to)\b)\w+)\s+at\s+((?:\w+\s+){0,2}\w+)\s+dot\s+(com|in|io|org|net|dev|ai)\b/gi,
+    (m, a, b, tld) => a.replace(/\s+/g, "").toLowerCase() + "@" +
+      b.replace(/\s+/g, "").toLowerCase() + "." + tld.toLowerCase());
+  // Website: "devbysaif dot in" -> devbysaif.in
+  t = t.replace(/\b(\w+)\s+dot\s+(com|in|io|org|net|dev|ai)\b/gi,
+    (m, a, tld) => a.toLowerCase() + "." + tld.toLowerCase());
+  // Time: "five thirty pm" -> 5:30 PM ; "five pm" -> 5 PM
+  t = t.replace(/\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\s+(twenty|thirty|forty|fifty)(?:\s+(one|two|three|four|five|six|seven|eight|nine))?\s+(am|pm)\b/gi,
+    (m, h, tens, ones, ap) => HOUR_WORDS[h.toLowerCase()] + ":" +
+      String(NUM_WORDS[tens.toLowerCase()] + (ones ? HOUR_WORDS[ones.toLowerCase()] : 0)).padStart(2, "0") +
+      " " + ap.toUpperCase());
+  t = t.replace(/\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\s+(am|pm)\b/gi,
+    (m, h, ap) => HOUR_WORDS[h.toLowerCase()] + " " + ap.toUpperCase());
+  // Date: "fifteen november 2026" -> 15 November 2026
+  t = t.replace(/\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty)(?:\s+(one|two|three|four|five|six|seven|eight|nine))?\s+(january|february|march|april|may|june|july|august|september|october|november|december)\b(?:\s+(\d{4}))?/gi,
+    (m, a, b, mon, yr) => {
+      let v = NUM_WORDS[a.toLowerCase()] + (b ? HOUR_WORDS[b.toLowerCase()] : 0);
+      if (v > 31) return m;
+      return v + " " + mon.charAt(0).toUpperCase() + mon.slice(1).toLowerCase() + (yr ? " " + yr : "");
+    });
+  // Built-in snippet from the Python defaults.
+  t = t.replace(/\bmy portfolio\b/gi, "https://www.devbysaif.in/");
+  return t;
+}
+
+let sessionWords = 0, sessionEdits = 0;
+function countEdits(before, after) {
+  const a = before.toLowerCase().split(/\s+/), b = after.toLowerCase().split(/\s+/);
+  let diff = Math.abs(a.length - b.length);
+  for (let i = 0; i < Math.min(a.length, b.length); i++) if (a[i] !== b[i]) diff++;
+  return diff;
+}
+
 function applyStyleJS(t, style) {
   const exp = { "can't": "cannot", "won't": "will not", "don't": "do not",
     "i'm": "I am", "it's": "it is", "that's": "that is", "let's": "let us" };
@@ -61,20 +102,30 @@ function toCodeJS(t) {
 }
 
 function clean() {
-  let t = $("input").value.trim();
-  if (!t) return;
+  let raw = $("input").value.trim();
+  if (!raw) return;
   const started = performance.now();
-  t = capitalise(spokenPunctuation(removeFillers(selfCorrect(t))));
+  let t = capitalise(smartFormatsJS(spokenPunctuation(removeFillers(selfCorrect(raw)))));
   if ($("code").checked) t = toCodeJS(t);
   t = applyStyleJS(t, $("style").value);
-  if (t && /[a-z0-9]$/i.test(t)) t += ".";
+  if (t && /[a-z0-9]$/i.test(t) && !$("code").checked) t += ".";
   $("output").value = t;
   const words = t.split(/\s+/).filter(Boolean).length;
   wordCount += words;
+  sessionWords += words;
+  sessionEdits += countEdits(raw, t);
+  $("stat-words").textContent = sessionWords;
+  $("stat-edits").textContent = sessionEdits;
   const secs = ((performance.now() - started) / 1000).toFixed(2);
   $("stats").textContent = words + " words cleaned in " + secs +
     "s on this device. Session total: " + wordCount + " words.";
 }
+
+document.querySelectorAll("[data-example]").forEach((chip) =>
+  chip.addEventListener("click", () => {
+    $("input").value = chip.dataset.example;
+    clean();
+  }));
 
 $("clean").addEventListener("click", clean);
 $("copy").addEventListener("click", () =>

@@ -53,17 +53,27 @@ MONTHS = {"january", "february", "march", "april", "may", "june", "july",
           "august", "september", "october", "november", "december"}
 
 
+# Precompiled at import: cleanup runs on every dictation, so no
+# pattern is ever compiled twice. This is the v0.2 speed pass.
+_FILLER_PHRASE_RES = [re.compile(rf"\b{p}\b,?", re.I)
+                      for p in FILLER_PHRASES]
+_FILLER_RES = [re.compile(rf"\b{f}\b,?", re.I) for f in FILLERS]
+_REPETITION_RE = re.compile(r"\b(\w+)(\s+\1\b)+", re.I)
+_PUNCT_RES = [(re.compile(rf"\s*\b{re.escape(p)}\b\s*", re.I), s)
+              for p, s in SPOKEN_PUNCTUATION]
+
+
 def _remove_fillers(text: str) -> str:
-    for phrase in FILLER_PHRASES:
-        text = re.sub(rf"\b{phrase}\b,?", "", text, flags=re.I)
-    for filler in FILLERS:
-        text = re.sub(rf"\b{filler}\b,?", "", text, flags=re.I)
+    for pat in _FILLER_PHRASE_RES:
+        text = pat.sub("", text)
+    for pat in _FILLER_RES:
+        text = pat.sub("", text)
     return text
 
 
 def _remove_repetitions(text: str) -> str:
     # "the the" -> "the", "I I I" -> "I" (immediate repeats only)
-    return re.sub(r"\b(\w+)(\s+\1\b)+", r"\1", text, flags=re.I)
+    return _REPETITION_RE.sub(r"\1", text)
 
 
 def _smart_title(word: str) -> str:
@@ -125,11 +135,8 @@ def _capitalise_calendar_words(text: str) -> str:
 
 
 def _apply_spoken_punctuation(text: str) -> str:
-    lower_map = {}
-    for phrase, symbol in SPOKEN_PUNCTUATION:
-        lower_map[phrase] = symbol
-        text = re.sub(rf"\s*\b{re.escape(phrase)}\b\s*", symbol + " ",
-                      text, flags=re.I)
+    for pat, symbol in _PUNCT_RES:
+        text = pat.sub(symbol + " ", text)
     # Tidy spaces around punctuation and collapse blank runs.
     text = re.sub(r"\s+([,.!?;:])", r"\1", text)
     text = re.sub(r"\(\s+", "(", text)
@@ -186,6 +193,8 @@ def clean_text(raw: str, *, use_list_format: bool = True) -> str:
     text = _remove_fillers(text)
     text = _remove_repetitions(text)
     text = _apply_spoken_punctuation(text)
+    from .formats import apply_smart_formats
+    text = apply_smart_formats(text)
     text = _capitalise_calendar_words(text)
     if use_list_format:
         text = _format_spoken_list(text)

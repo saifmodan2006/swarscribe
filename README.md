@@ -1,5 +1,7 @@
 # FlowScribe
 
+![FlowScribe banner](assets/banner.svg)
+
 **Speak naturally. Get finished text. Nothing leaves your device.**
 
 FlowScribe is an offline-first AI dictation system that does the job of Wispr Flow, and then keeps going: dual-engine transcription, smart cleanup, voice command editing, a dedicated code mode, meeting notes, and dictation analytics, all built from open source, all free, with no word caps and no account.
@@ -39,7 +41,24 @@ You get:   The meeting is on Tuesday at five, and please check
 | **Meeting Mode** | Dictate or paste a whole meeting, get a summary, decisions and action items. No bot joins your call. |
 | **Hinglish ready** | Whisper language routing plus cleanup tuned for mixed Hindi and English speech, the way India actually talks. |
 | **Dictation analytics** | Words dictated, speaking speed, and an honest estimate of minutes saved versus typing at 40 WPM. Stored locally, for you only. |
+| **Smart formats (v0.2)** | Emails, websites, times, dates and amounts land written: "five thirty pm" becomes 5:30 PM, "fifteen november 2026" becomes 15 November 2026, "saif modan at gmail dot com" becomes saifmodan@gmail.com. |
+| **Auto-learn (v0.2)** | Correct a word by hand once and FlowScribe learns it into your dictionary. Wispr makes you add words manually. |
+| **Command chains (v0.2)** | Voice macros in one breath: "make it formal and shorten it" runs both edits, in order. |
+| **Translation mode (v0.2)** | Speak English, land Hindi, or the other way, with an offline phrasebook and an optional local LLM layer for full sentences. |
+| **History and edit stats (v0.2)** | Undo for dictation sessions, Markdown export, and every result reports how many edits the pipeline just saved you. |
 | **API and web demo included** | A FastAPI service and a zero-backend browser demo ship in the repo. |
+
+## What is new in v0.2
+
+Smart formats, auto-learning dictionary, command chains, translation mode, session history with undo, edit stats on every result, a faster precompiled cleanup engine with a shipped benchmark, a redesigned web demo, and full project polish: logo, banner, CI on three Python versions, and contributor guides. See [CHANGELOG.md](CHANGELOG.md).
+
+## Performance
+
+The cleanup pipeline is the hot path, so it is precompiled, allocation-light standard library Python with no model calls and no I/O. Run the honest, on-your-machine numbers yourself:
+
+```bash
+python benchmarks/benchmark.py
+```
 
 Full side-by-side: [docs/COMPARISON.md](docs/COMPARISON.md)
 

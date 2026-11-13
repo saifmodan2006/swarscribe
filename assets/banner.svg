@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" width="1200" height="300">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1020"/>
+      <stop offset="1" stop-color="#232c55"/>
+    </linearGradient>
+    <linearGradient id="tx" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6c8cff"/>
+      <stop offset="1" stop-color="#c09dff"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="300" fill="url(#bg)"/>
+  <g fill="none" stroke="#6c8cff" stroke-width="10" stroke-linecap="round" opacity="0.9">
+    <line x1="90" y1="120" x2="90" y2="180"/>
+    <line x1="125" y1="95" x2="125" y2="205"/>
+    <line x1="160" y1="70" x2="160" y2="230"/>
+    <line x1="195" y1="100" x2="195" y2="200"/>
+    <line x1="230" y1="125" x2="230" y2="175"/>
+  </g>
+  <text x="290" y="150" font-family="Segoe UI, Arial, sans-serif" font-size="82" font-weight="700" fill="url(#tx)">FlowScribe</text>
+  <text x="293" y="205" font-family="Segoe UI, Arial, sans-serif" font-size="31" fill="#eef1ff">Speak naturally. Get finished text. Nothing leaves your device.</text>
+  <text x="293" y="252" font-family="Segoe UI, Arial, sans-serif" font-size="24" fill="#9aa5d1">Offline-first AI dictation: Parakeet + Whisper - Command Mode - Code Mode - Meeting Notes</text>
+</svg>

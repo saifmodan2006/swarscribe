@@ -19,9 +19,10 @@ class TestCleanup(unittest.TestCase):
             "The meeting is on Tuesday at five.")
 
     def test_self_correction_anchored_phrase(self):
+        # v0.2: smart formats also write the corrected time properly.
         self.assertEqual(
             clean_text("the call is at five, no wait, at six pm"),
-            "The call is at six pm.")
+            "The call is at 6 PM.")
 
     def test_repetition_removed(self):
         self.assertEqual(clean_text("this is is the the plan"),

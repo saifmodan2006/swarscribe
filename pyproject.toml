@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "flowscribe"
-version = "0.1.0"
+version = "0.2.0"
 description = "Offline-first AI dictation that out-thinks Wispr Flow: dual-engine transcription, smart cleanup, command mode, code mode, meeting notes and analytics, 100 percent private by default."
 readme = "README.md"
 license = { text = "MIT" }

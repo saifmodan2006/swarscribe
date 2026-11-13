@@ -41,12 +41,32 @@ def _bullet_list(text: str) -> str:
     return "\n".join(f"- {item}" for item in items)
 
 
+KNOWN_COMMANDS = (
+    "make it formal", "make formal", "formal", "make it casual",
+    "make casual", "casual", "make it shorter", "shorten it",
+    "shorten", "make shorter", "make it a list", "make a list",
+    "bullet list", "turn it into a list", "uppercase", "lowercase",
+    "title case", "remove fillers", "clean it up", "clean up",
+    "add a greeting", "sign off", "add sign off", "add a sign off",
+)
+
+
 def apply_command(text: str, command: str) -> str:
     """Apply a spoken editing command to text. Unknown commands are
-    returned unchanged so a mis-heard command never destroys text."""
+    returned unchanged so a mis-heard command never destroys text.
+
+    Commands chain in v0.2: "make it formal and shorten it" runs
+    both, in order, like a tiny voice macro."""
     if not text:
         return text
     cmd = command.strip().lower().rstrip(".")
+    if " and " in cmd:
+        parts = [p.strip() for p in cmd.split(" and ")]
+        if len(parts) > 1 and all(p in KNOWN_COMMANDS for p in parts):
+            out = text
+            for part in parts:
+                out = apply_command(out, part)
+            return out
     if cmd in ("make it formal", "make formal", "formal"):
         return apply_style(text, "formal")
     if cmd in ("make it casual", "make casual", "casual"):

@@ -66,6 +66,11 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--engine", default="auto")
     p.add_argument("--language", default=None)
 
+    p = sub.add_parser("translate", help="Translate text (phrasebook + optional LLM)")
+    p.add_argument("text")
+    p.add_argument("--from-lang", default="en")
+    p.add_argument("--to-lang", default="hi")
+
     sub.add_parser("stats", help="Show dictation analytics summary")
 
     args = parser.parse_args(argv)
@@ -90,6 +95,9 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps({"engine": transcript.engine,
                           "raw": transcript.text,
                           "clean": result.text}, indent=2))
+    elif args.cmd == "translate":
+        from .translate import translate_text
+        print(translate_text(args.text, args.from_lang, args.to_lang))
     elif args.cmd == "stats":
         print(json.dumps(Analytics().summary(), indent=2))
     return 0
