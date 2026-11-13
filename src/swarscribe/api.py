@@ -9,6 +9,13 @@ Endpoints:
 - POST /code      {text} -> code-shaped text
 - POST /meeting   {transcript} -> summary, decisions, action items
 - GET  /health    -> status and version
+- GET  /stats     -> local dictation analytics (the dashboard data)
+- GET  /models    -> speech models and which are downloaded
+- GET  /dictionary -> the personal dictionary
+- POST /transcribe {wav_base64, language?} -> transcript + cleaned text
+  (server mode for the Android app: the phone records, this machine,
+  on the same local network, runs the big models. Nothing is uploaded
+  to any cloud, the request never leaves the user's own network.)
 
 FastAPI is an optional extra: pip install swarscribe[api]
 """
@@ -77,5 +84,35 @@ if FastAPI is not None:
                 "decisions": notes.decisions,
                 "action_items": notes.action_items,
                 "markdown": notes.to_markdown()}
+
+    class TranscribeIn(BaseModel):
+        wav_base64: str
+        language: str | None = None
+
+    @app.get("/stats")
+    def stats():
+        from .app import build_pipeline
+        _, _, analytics = build_pipeline()
+        return analytics.summary()
+
+    @app.get("/models")
+    def models():
+        from .models import status as model_status
+        return {"models": model_status()}
+
+    @app.get("/dictionary")
+    def dictionary():
+        return {"entries": _pipeline.dictionary.entries}
+
+    @app.post("/transcribe")
+    def transcribe(payload: TranscribeIn):
+        import base64
+
+        from .transcribe import transcribe_wav_bytes
+        audio = base64.b64decode(payload.wav_base64)
+        heard = transcribe_wav_bytes(audio, language=payload.language)
+        result = _pipeline.process(heard.text)
+        return {"raw": heard.text, "text": result.text,
+                "engine": heard.engine, "language": heard.language}
 else:  # pragma: no cover
     app = None

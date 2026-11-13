@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SwarScribe</string>
+    <string name="app_title">SwarScribe</string>
+    <string name="app_motto">Say it. It is written.</string>
+    <string name="kb_ready">Tap the mic and speak</string>
+    <string name="kb_listening">Listening...</string>
+    <string name="kb_mic">Tap to dictate</string>
+    <string name="dictate_on_device">Dictate on this phone</string>
+    <string name="dictate_via_desktop">Record / send to my desktop</string>
+    <string name="server_hint">Desktop address, e.g. http://192.168.1.10:8000</string>
+    <string name="server_recording">Recording... tap again to send</string>
+    <string name="server_sending">Sending to your desktop...</string>
+    <string name="enable_keyboard">Enable the SwarScribe keyboard</string>
+</resources>

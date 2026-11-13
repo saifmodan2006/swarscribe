@@ -48,9 +48,17 @@ You get:   The meeting is on Tuesday at five, and please check
 | **History and edit stats (v0.2)** | Undo for dictation sessions, Markdown export, and every result reports how many edits the pipeline just saved you. |
 | **API and web demo included** | A FastAPI service and a zero-backend browser demo ship in the repo. |
 
-## What is new in v0.2
+## What is new in v0.4
 
-Smart formats, auto-learning dictionary, command chains, translation mode, session history with undo, edit stats on every result, a faster precompiled cleanup engine with a shipped benchmark, a redesigned web demo, and full project polish: logo, banner, CI on three Python versions, and contributor guides. See [CHANGELOG.md](CHANGELOG.md).
+SwarScribe now dictates for real, on desktop and on Android. The desktop app records push-to-talk, trims silence with a built-in VAD, transcribes with local Whisper or Parakeet models (verified end to end against a real speech sample), cleans the text, and types it at your cursor, with a local dashboard for your stats, models and dictionary. The new `android/` project adds a companion app and a system keyboard that commits cleaned text in any app, on-device or through your own desktop over your Wi-Fi. See [CHANGELOG.md](CHANGELOG.md).
+
+Run the desktop app:
+
+```bash
+pip install "swarscribe[all]"
+swarscribe app          # press Enter, speak, Enter again, written
+swarscribe dashboard    # local dashboard API and stats
+```
 
 ## Performance
 

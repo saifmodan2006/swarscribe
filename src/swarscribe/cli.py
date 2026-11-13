@@ -73,6 +73,15 @@ def main(argv: list[str] | None = None) -> int:
 
     sub.add_parser("stats", help="Show dictation analytics summary")
 
+    p = sub.add_parser("app", help="Run the desktop dictation app")
+    p.add_argument("--engine", default="auto")
+    p.add_argument("--model", default=None)
+
+    sub.add_parser("models", help="List speech models and downloads")
+
+    p = sub.add_parser("dashboard", help="Serve the local dashboard API")
+    p.add_argument("--port", type=int, default=8000)
+
     args = parser.parse_args(argv)
 
     if args.cmd == "clean":
@@ -100,6 +109,22 @@ def main(argv: list[str] | None = None) -> int:
         print(translate_text(args.text, args.from_lang, args.to_lang))
     elif args.cmd == "stats":
         print(json.dumps(Analytics().summary(), indent=2))
+    elif args.cmd == "app":
+        from .app import run_app
+        run_app(engine=args.engine, model=args.model)
+    elif args.cmd == "models":
+        from .models import status
+        print(json.dumps(status(), indent=2))
+    elif args.cmd == "dashboard":
+        try:
+            import uvicorn
+        except ImportError:
+            print("Dashboard needs the api extra: "
+                  "pip install 'swarscribe[api]'")
+            return 1
+        print(f"Dashboard API: http://127.0.0.1:{args.port}/docs")
+        print("Stats: /stats  Models: /models  Dictionary: /dictionary")
+        uvicorn.run("swarscribe.api:app", port=args.port)
     return 0
 
 

@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.4.0, 2026-11-13
+
+### It actually dictates now
+- **Real transcription, verified end to end:** faster-whisper was installed and the full path (audio file in, model, transcript, cleanup) transcribed the JFK sample perfectly, and the recorder path (AudioBuffer, VAD trim, WAV, transcribe) verified the same way. This is the first release where speech to text is proven, not just plumbed.
+- **Desktop app** (`swarscribe app`): push-to-talk recording with the new `recorder.py`, energy based VAD in `vad.py` that trims silence before the model ever sees it, model registry and cache in `models.py`, local history and stats persisted in `~/.swarscribe`, clean text typed at the cursor.
+- **Dashboard:** new API endpoints `/stats`, `/models`, `/dictionary` and `/transcribe`, a `web/dashboard.html` page that renders them, and `swarscribe dashboard` / `swarscribe models` commands.
+- **Android app and keyboard** in `android/`: a companion app plus a system input method (one mic button, cleaned text committed at the cursor in any app), a Kotlin port of the cleanup rules, on-device recognition with the offline preference, and server mode, where the phone records and your own desktop transcribes over your Wi-Fi. An Android CI workflow builds the debug APK on every Android change.
+- Dependency note: the whisper extra now pins `av<15`, because faster-whisper 1.2 calls a PyAV API that newer PyAV removed.
+- 52 tests, all passing.
+
 ## v0.3.0, 2026-11-13
 
 ### The rebrand

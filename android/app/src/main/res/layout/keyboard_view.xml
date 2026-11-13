@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#0E1116"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/kbStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/kb_ready"
+        android:textColor="#A7B0BE" />
+
+    <Button
+        android:id="@+id/kbMic"
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:layout_marginTop="10dp"
+        android:backgroundTint="#FF5A36"
+        android:text="@string/kb_mic"
+        android:textColor="#FAF5EC"
+        android:textSize="18sp" />
+</LinearLayout>

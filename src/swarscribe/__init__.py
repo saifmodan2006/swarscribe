@@ -7,7 +7,7 @@ meeting notes, translation mode and dictation analytics.
 100 percent private by default: everything can run on your machine.
 """
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 __all__ = ["Pipeline", "clean_text", "__version__"]
 
 from .pipeline import Pipeline

@@ -34,14 +34,19 @@ class BackendUnavailable(RuntimeError):
 class FasterWhisperBackend:
     name = "faster-whisper"
 
-    def __init__(self, model: str = "large-v3-turbo"):
+    def __init__(self, model: str = "large-v3-turbo",
+                 download_root: str | None = None):
         try:
             from faster_whisper import WhisperModel
         except ImportError as exc:
             raise BackendUnavailable(
                 "faster-whisper is not installed. "
                 "Install with: pip install swarscribe[whisper]") from exc
-        self._model = WhisperModel(model, compute_type="auto")
+        if download_root is None:
+            from .models import cache_dir
+            download_root = str(cache_dir())
+        self._model = WhisperModel(model, compute_type="auto",
+                                   download_root=download_root)
 
     def transcribe(self, audio_path: str,
                    language: str | None = None) -> Transcript:
@@ -90,7 +95,30 @@ class EchoBackend:
                           language=language)
 
 
-def choose_backend(preference: str = "auto", language: str | None = None):
+def transcribe_file(path: str, backend=None,
+                    language: str | None = None) -> Transcript:
+    """Transcribe an audio file with the chosen (or best) backend."""
+    backend = backend or choose_backend(language=language)
+    return backend.transcribe(path, language=language)
+
+
+def transcribe_wav_bytes(data: bytes, backend=None,
+                         language: str | None = None) -> Transcript:
+    """Transcribe in-memory WAV bytes (the recorder's output)."""
+    import os
+    import tempfile
+    backend = backend or choose_backend(language=language)
+    fd, path = tempfile.mkstemp(suffix=".wav")
+    try:
+        with os.fdopen(fd, "wb") as f:
+            f.write(data)
+        return backend.transcribe(path, language=language)
+    finally:
+        os.unlink(path)
+
+
+def choose_backend(preference: str = "auto", language: str | None = None,
+                   model: str | None = None):
     """Pick the best available engine.
 
     English live dictation prefers Parakeet (speed). Any other
@@ -107,6 +135,8 @@ def choose_backend(preference: str = "auto", language: str | None = None):
         return EchoBackend()
     for cls in order:
         try:
+            if cls is FasterWhisperBackend and model:
+                return cls(model=model)
             return cls()
         except BackendUnavailable:
             continue
