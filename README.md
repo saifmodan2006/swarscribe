@@ -1,21 +1,21 @@
-# FlowScribe
+# SwarScribe
 
-![FlowScribe banner](assets/banner.svg)
+![SwarScribe banner](assets/banner.svg)
 
 **Speak naturally. Get finished text. Nothing leaves your device.**
 
-FlowScribe is an offline-first AI dictation system that does the job of Wispr Flow, and then keeps going: dual-engine transcription, smart cleanup, voice command editing, a dedicated code mode, meeting notes, and dictation analytics, all built from open source, all free, with no word caps and no account.
+SwarScribe is an offline-first AI dictation system that does the job of Wispr Flow, and then keeps going: dual-engine transcription, smart cleanup, voice command editing, a dedicated code mode, meeting notes, and dictation analytics, all built from open source, all free, with no word caps and no account.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![Privacy](https://img.shields.io/badge/privacy-local%20first-brightgreen)
 ![Status](https://img.shields.io/badge/status-v0.1.0-orange)
 
-> Wispr Flow sends every word you say to the cloud, caps its free plan at 2,000 words a week, and charges for Command Mode. FlowScribe runs on your machine, has no caps, and treats those features as table stakes.
+> Wispr Flow sends every word you say to the cloud, caps its free plan at 2,000 words a week, and charges for Command Mode. SwarScribe runs on your machine, has no caps, and treats those features as table stakes.
 
 ## What it does
 
-Hold a hotkey, speak the way you actually talk, rambling, fillers, mid-sentence corrections and all, and FlowScribe lands clean, formatted text wherever your cursor is.
+Hold a hotkey, speak the way you actually talk, rambling, fillers, mid-sentence corrections and all, and SwarScribe lands clean, formatted text wherever your cursor is.
 
 ```text
 You say:   um the meeting is on monday no wait tuesday at five comma
@@ -42,7 +42,7 @@ You get:   The meeting is on Tuesday at five, and please check
 | **Hinglish ready** | Whisper language routing plus cleanup tuned for mixed Hindi and English speech, the way India actually talks. |
 | **Dictation analytics** | Words dictated, speaking speed, and an honest estimate of minutes saved versus typing at 40 WPM. Stored locally, for you only. |
 | **Smart formats (v0.2)** | Emails, websites, times, dates and amounts land written: "five thirty pm" becomes 5:30 PM, "fifteen november 2026" becomes 15 November 2026, "saif modan at gmail dot com" becomes saifmodan@gmail.com. |
-| **Auto-learn (v0.2)** | Correct a word by hand once and FlowScribe learns it into your dictionary. Wispr makes you add words manually. |
+| **Auto-learn (v0.2)** | Correct a word by hand once and SwarScribe learns it into your dictionary. Wispr makes you add words manually. |
 | **Command chains (v0.2)** | Voice macros in one breath: "make it formal and shorten it" runs both edits, in order. |
 | **Translation mode (v0.2)** | Speak English, land Hindi, or the other way, with an offline phrasebook and an optional local LLM layer for full sentences. |
 | **History and edit stats (v0.2)** | Undo for dictation sessions, Markdown export, and every result reports how many edits the pipeline just saved you. |
@@ -67,21 +67,21 @@ Full side-by-side: [docs/COMPARISON.md](docs/COMPARISON.md)
 No model download is needed to try the cleanup pipeline, the demo, the CLI text commands, the API, or the web demo.
 
 ```bash
-git clone https://github.com/saifmodan2006/flowscribe.git
-cd flowscribe
+git clone https://github.com/saifmodan2006/swarscribe.git
+cd swarscribe
 pip install -e .
 
 # Clean raw dictation text
-flowscribe clean "um the meeting is on monday no wait tuesday at five"
+swarscribe clean "um the meeting is on monday no wait tuesday at five"
 
 # Voice-edit text
-flowscribe command --do "make it formal" --text "i can't make it"
+swarscribe command --do "make it formal" --text "i can't make it"
 
 # Dictate code
-flowscribe code "snake case user name equals five"
+swarscribe code "snake case user name equals five"
 
 # Meeting notes from a transcript file
-flowscribe meeting examples/sample_transcript.txt
+swarscribe meeting examples/sample_transcript.txt
 
 # See it all working
 python examples/demo.py
@@ -95,8 +95,8 @@ pip install -e ".[parakeet]"    # NVIDIA Parakeet v3, fastest English
 pip install -e ".[api]"         # FastAPI service
 pip install -e ".[desktop]"     # push-to-talk + paste at cursor
 
-flowscribe transcribe recording.wav --language en
-uvicorn flowscribe.api:app --reload   # API docs at /docs
+swarscribe transcribe recording.wav --language en
+uvicorn swarscribe.api:app --reload   # API docs at /docs
 ```
 
 For the web demo, just open `web/index.html` in a browser. It runs the cleanup pipeline in JavaScript, supports mic input where the browser allows it, and needs no server.
@@ -119,7 +119,7 @@ Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · Roadmap: [docs/ROADMAP.
 ## Project layout
 
 ```text
-src/flowscribe/   the package: pipeline, cleanup, transcribe, codemode,
+src/swarscribe/   the package: pipeline, cleanup, transcribe, codemode,
                   commands, meeting, analytics, desktop, api, cli
 web/              zero-backend browser demo
 docs/             architecture, Wispr comparison, roadmap
@@ -143,7 +143,7 @@ pytest
 - [FastAPI](https://fastapi.tiangolo.com/), [Ollama](https://ollama.com/) for the optional local LLM pass
 - Inspired by the open source dictation community: [Handy](https://github.com/cjpais/Handy) and [OpenWhispr](https://github.com/OpenWhispr/openwhispr), both MIT, proved local system-wide dictation works
 
-FlowScribe is an original implementation. It does not use Wispr Flow code, models, or branding beyond naming it as the reference product it improves on.
+SwarScribe is an original implementation. It does not use Wispr Flow code, models, or branding beyond naming it as the reference product it improves on.
 
 ## Contributing
 

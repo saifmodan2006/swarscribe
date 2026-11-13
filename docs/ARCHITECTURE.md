@@ -1,4 +1,4 @@
-# FlowScribe Architecture
+# SwarScribe Architecture
 
 ## Design principles
 
@@ -75,7 +75,7 @@ Parakeet TDT 0.6B v3 beats Whisper large-v3 on English word error
 rate and runs many times faster, which is what live dictation feels
 like. Whisper covers 99 languages, which Parakeet does not, and it
 is the practical choice for Hindi and mixed Hindi-English speech.
-FlowScribe routes by language instead of forcing one trade-off.
+SwarScribe routes by language instead of forcing one trade-off.
 
 ## Privacy model
 

@@ -1,13 +1,13 @@
 import unittest
 
-from flowscribe.analytics import Analytics
-from flowscribe.codemode import to_code
-from flowscribe.commands import apply_command
-from flowscribe.dictionary import PersonalDictionary
-from flowscribe.meeting import analyse_meeting
-from flowscribe.pipeline import Pipeline
-from flowscribe.snippets import SnippetLibrary
-from flowscribe.styles import apply_style
+from swarscribe.analytics import Analytics
+from swarscribe.codemode import to_code
+from swarscribe.commands import apply_command
+from swarscribe.dictionary import PersonalDictionary
+from swarscribe.meeting import analyse_meeting
+from swarscribe.pipeline import Pipeline
+from swarscribe.snippets import SnippetLibrary
+from swarscribe.styles import apply_style
 
 
 class TestDictionaryAndSnippets(unittest.TestCase):

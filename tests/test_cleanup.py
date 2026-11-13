@@ -1,6 +1,6 @@
 import unittest
 
-from flowscribe.cleanup import clean_text
+from swarscribe.cleanup import clean_text
 
 
 class TestCleanup(unittest.TestCase):

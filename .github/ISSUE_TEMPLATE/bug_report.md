@@ -9,7 +9,7 @@ labels: bug
 
 **What you dictated (raw text or audio description)**
 
-**What FlowScribe produced**
+**What SwarScribe produced**
 
 **What you expected**
 

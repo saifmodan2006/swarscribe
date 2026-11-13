@@ -1,35 +1,35 @@
-:root { --bg:#0b1020; --card:#141a33; --ink:#eef1ff; --muted:#9aa5d1; --acc:#6c8cff; --acc2:#9d6cff; }
+:root { --bg:#0E1116; --card:#171B21; --ink:#eef1ff; --muted:#9aa5d1; --acc:#FF5A36; --acc2:#FFB43A; }
 * { box-sizing:border-box; }
 body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--ink); }
-.hero { text-align:center; padding:52px 16px 20px; background:radial-gradient(720px 300px at 50% -40px, #2a3468 0%, transparent 70%); }
+.hero { text-align:center; padding:52px 16px 20px; background:radial-gradient(720px 300px at 50% -40px, #2A2F38 0%, transparent 70%); }
 .logo { width:84px; height:84px; }
 .hero h1 { font-size:52px; margin:10px 0 4px; letter-spacing:.5px; }
-.hero h1 span { background:linear-gradient(90deg,var(--acc),#c09dff); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.hero h1 span { background:linear-gradient(90deg,var(--acc),#FFCF7A); -webkit-background-clip:text; background-clip:text; color:transparent; }
 .tag { color:var(--ink); font-size:20px; line-height:1.45; margin:6px 0; }
 .badges span { display:inline-block; border:1px solid var(--acc); border-radius:999px; padding:4px 12px; margin:3px; font-size:13px; color:var(--acc); }
 .cta { margin:18px 0 6px; }
-.btn { display:inline-block; padding:11px 20px; border-radius:10px; border:1px solid #39468a; color:var(--ink); text-decoration:none; margin:0 4px; }
-.btn.primary { background:linear-gradient(90deg,var(--acc),var(--acc2)); color:#08102e; font-weight:700; border:none; }
+.btn { display:inline-block; padding:11px 20px; border-radius:10px; border:1px solid #3A3F47; color:var(--ink); text-decoration:none; margin:0 4px; }
+.btn.primary { background:linear-gradient(90deg,var(--acc),var(--acc2)); color:#200E06; font-weight:700; border:none; }
 .proof { color:var(--muted); font-size:14px; }
 main { max-width:920px; margin:0 auto; padding:10px 16px 16px; }
 .card { background:var(--card); border-radius:14px; padding:20px; margin:14px 0; }
 .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; }
 .grid .card { margin:0; }
-textarea { width:100%; border-radius:10px; border:1px solid #2a3468; background:#0e1430; color:var(--ink); padding:12px; font-size:15px; }
-button { background:#232c55; color:var(--ink); border:1px solid #39468a; padding:9px 15px; border-radius:9px; cursor:pointer; font-size:14px; }
-button:hover { background:#2c3870; }
-button.primary { background:linear-gradient(90deg,var(--acc),var(--acc2)); color:#08102e; font-weight:700; border:none; }
+textarea { width:100%; border-radius:10px; border:1px solid #2A2F38; background:#10131A; color:var(--ink); padding:12px; font-size:15px; }
+button { background:#22262E; color:var(--ink); border:1px solid #3A3F47; padding:9px 15px; border-radius:9px; cursor:pointer; font-size:14px; }
+button:hover { background:#2E333B; }
+button.primary { background:linear-gradient(90deg,var(--acc),var(--acc2)); color:#200E06; font-weight:700; border:none; }
 .chip { border-radius:999px; font-size:13px; padding:6px 13px; }
 .row { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:12px 0; }
 .hint { color:var(--muted); font-size:13.5px; }
 #stats { color:var(--muted); font-size:13.5px; }
-.stats-band { display:flex; flex-wrap:wrap; gap:14px; justify-content:space-between; background:linear-gradient(90deg,#1a2450,#2a2050); border-radius:14px; padding:18px 22px; margin:14px 0; }
+.stats-band { display:flex; flex-wrap:wrap; gap:14px; justify-content:space-between; background:linear-gradient(90deg,#1D2129,#262019); border-radius:14px; padding:18px 22px; margin:14px 0; }
 .stats-band div { display:flex; flex-direction:column; }
 .stats-band strong { font-size:28px; }
 .stats-band span { color:var(--muted); font-size:13px; }
 table { width:100%; border-collapse:collapse; font-size:14.5px; }
-th, td { text-align:left; padding:8px 10px; border-bottom:1px solid #2a3468; }
+th, td { text-align:left; padding:8px 10px; border-bottom:1px solid #2A2F38; }
 th { color:var(--acc); }
-code { background:#0e1430; padding:1px 6px; border-radius:5px; }
+code { background:#10131A; padding:1px 6px; border-radius:5px; }
 footer { text-align:center; color:var(--muted); padding:22px; }
 a { color:var(--acc); }

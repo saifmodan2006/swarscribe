@@ -1,6 +1,6 @@
 """Run: python examples/demo.py
 
-Shows the whole FlowScribe pipeline on sample dictation, with no
+Shows the whole SwarScribe pipeline on sample dictation, with no
 model downloads and no network. This is text-in mode (EchoBackend):
 in real use the raw text comes from Parakeet or Whisper.
 """
@@ -10,12 +10,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from flowscribe import Pipeline
-from flowscribe.analytics import Analytics
-from flowscribe.commands import apply_command
-from flowscribe.dictionary import PersonalDictionary
-from flowscribe.meeting import analyse_meeting
-from flowscribe.snippets import SnippetLibrary
+from swarscribe import Pipeline
+from swarscribe.analytics import Analytics
+from swarscribe.commands import apply_command
+from swarscribe.dictionary import PersonalDictionary
+from swarscribe.meeting import analyse_meeting
+from swarscribe.snippets import SnippetLibrary
 
 pipe = Pipeline(dictionary=PersonalDictionary.default_for_saif(),
                 snippets=SnippetLibrary.defaults(),

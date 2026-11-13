@@ -2,7 +2,7 @@
 
 Run: python benchmarks/benchmark.py
 
-The cleanup pipeline is the part of FlowScribe that runs on every
+The cleanup pipeline is the part of SwarScribe that runs on every
 single dictation, so it is built to be boring and fast: precompiled
 patterns, no model calls, no I/O. This script times it honestly on
 whatever machine runs it and prints words per second.
@@ -14,7 +14,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from flowscribe.cleanup import clean_text
+from swarscribe.cleanup import clean_text
 
 SAMPLE = (
     "um the meeting is on monday no wait tuesday at five thirty pm "

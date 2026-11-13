@@ -1,15 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="SwarScribe logo">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#6c8cff"/>
-      <stop offset="1" stop-color="#9d6cff"/>
+    <linearGradient id="wave" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#FF5A36"/>
+      <stop offset="1" stop-color="#FFB43A"/>
     </linearGradient>
   </defs>
-  <rect x="4" y="4" width="112" height="112" rx="26" fill="#141a33"/>
-  <rect x="52" y="22" width="16" height="44" rx="8" fill="url(#g)"/>
-  <path d="M38 52a22 22 0 0 0 44 0" fill="none" stroke="url(#g)" stroke-width="7" stroke-linecap="round"/>
-  <line x1="60" y1="78" x2="60" y2="90" stroke="url(#g)" stroke-width="7" stroke-linecap="round"/>
-  <line x1="30" y1="98" x2="42" y2="98" stroke="#6c8cff" stroke-width="6" stroke-linecap="round"/>
-  <line x1="52" y1="98" x2="68" y2="98" stroke="#9d6cff" stroke-width="6" stroke-linecap="round"/>
-  <line x1="78" y1="98" x2="90" y2="98" stroke="#6c8cff" stroke-width="6" stroke-linecap="round"/>
+  <rect x="4" y="4" width="112" height="112" rx="28" fill="#0E1116"/>
+  <!-- voice wave: four bars, rising and falling like speech -->
+  <rect x="22" y="48" width="10" height="24" rx="5" fill="url(#wave)"/>
+  <rect x="38" y="38" width="10" height="44" rx="5" fill="url(#wave)"/>
+  <rect x="54" y="26" width="10" height="68" rx="5" fill="url(#wave)"/>
+  <rect x="70" y="42" width="10" height="36" rx="5" fill="url(#wave)"/>
+  <!-- the wave lands as a text cursor: speech, written -->
+  <rect x="90" y="30" width="7" height="60" rx="3.5" fill="#0FA38C"/>
+  <rect x="84" y="26" width="19" height="7" rx="3.5" fill="#0FA38C"/>
+  <rect x="84" y="87" width="19" height="7" rx="3.5" fill="#0FA38C"/>
 </svg>

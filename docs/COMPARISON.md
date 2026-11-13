@@ -1,11 +1,11 @@
-# FlowScribe vs Wispr Flow
+# SwarScribe vs Wispr Flow
 
 An honest comparison. Wispr Flow is a polished commercial product
 with a large team, native mobile keyboards and years of tuning.
-FlowScribe is an open source project built on open source models.
+SwarScribe is an open source project built on open source models.
 Here is where each one stands today.
 
-| | Wispr Flow | FlowScribe |
+| | Wispr Flow | SwarScribe |
 | --- | --- | --- |
 | Price | Free plan capped, Pro about $12 to 15 / month | Free, MIT licensed |
 | Word limits | 2,000 words / week on the free desktop plan | None |
@@ -32,9 +32,9 @@ Mobile dictation keyboards, onboarding polish, and a hosted cloud
 that just works with no model downloads. If you live on your phone,
 Wispr is ahead today.
 
-## Where FlowScribe wins
+## Where SwarScribe wins
 
 Privacy, price, no caps, Linux, code dictation, built-in command
 mode and meeting notes, and a pipeline you can inspect, fork and
 extend. Everything Wispr charges monthly for at the feature level,
-FlowScribe treats as table stakes for open source.
+SwarScribe treats as table stakes for open source.

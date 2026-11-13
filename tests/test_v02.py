@@ -1,13 +1,13 @@
 import unittest
 
-from flowscribe.cleanup import clean_text
-from flowscribe.commands import apply_command
-from flowscribe.dictionary import PersonalDictionary
-from flowscribe.formats import parse_number_words
-from flowscribe.history import History
-from flowscribe.learn import learn_from_edit
-from flowscribe.pipeline import Pipeline
-from flowscribe.translate import translate_text
+from swarscribe.cleanup import clean_text
+from swarscribe.commands import apply_command
+from swarscribe.dictionary import PersonalDictionary
+from swarscribe.formats import parse_number_words
+from swarscribe.history import History
+from swarscribe.learn import learn_from_edit
+from swarscribe.pipeline import Pipeline
+from swarscribe.translate import translate_text
 
 
 class TestSmartFormats(unittest.TestCase):

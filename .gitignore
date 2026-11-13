@@ -6,7 +6,7 @@ build/
 .venv/
 venv/
 .env
-.flowscribe/
+.swarscribe/
 *.wav
 *.mp3
 .pytest_cache/

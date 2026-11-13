@@ -1,4 +1,4 @@
-// FlowScribe web demo: a faithful JS port of the Python cleanup
+// SwarScribe web demo: a faithful JS port of the Python cleanup
 // pipeline (fillers, self-corrections, spoken punctuation, calendar
 // capitalisation, formal/casual styles) so the demo runs anywhere
 // with zero backend. The Python package is the full version.
