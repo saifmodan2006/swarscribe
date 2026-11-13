@@ -4,7 +4,14 @@ Two bots, one idea: send a voice note, get clean formatted text back.
 Both run the local SwarScribe pipeline, so speech is transcribed on the
 machine running the bot, not by a third-party dictation service.
 
-## Telegram (works today, 5 minute setup)
+## Telegram (LIVE: [@swarscribe_bot](https://t.me/swarscribe_bot))
+
+The official SwarScribe bot is live: open it, tap Start, send a voice
+note, get clean text back. It runs on a local Whisper model, and audio
+is deleted right after each reply. To run your own instance instead,
+the setup is below.
+
+## Telegram (self-host, 5 minute setup)
 
 1. Message @BotFather, send /newbot, copy the token.
 2. `pip install "swarscribe[whisper]"` and make sure `ffmpeg` is installed.

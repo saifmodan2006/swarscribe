@@ -59,6 +59,6 @@ fighting the recognizer.
 - [ ] LinkedIn post (Saif posts, or approves the exact copy)
 - [ ] Show HN submission
 - [ ] r/opensource and r/selfhosted posts
-- [ ] Telegram bot live with a BotFather token, link added to README
+- [x] Telegram bot live with a BotFather token, link added to README (https://t.me/swarscribe_bot, verified end to end 2026-11-13)
 - [ ] First physical-phone run of the Android APK, notes into android/README.md
 - [ ] Product Hunt scheduled after the phone run

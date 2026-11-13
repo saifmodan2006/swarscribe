@@ -14,7 +14,7 @@ SwarScribe is an offline-first AI dictation system that does the job of Wispr Fl
 [![Android](https://github.com/saifmodan2006/swarscribe/actions/workflows/android.yml/badge.svg)](https://github.com/saifmodan2006/swarscribe/actions/workflows/android.yml)
 ![Tests](https://img.shields.io/badge/tests-70%20passing-brightgreen)
 
-**[Try the live demo in your browser](https://saifmodan2006.github.io/swarscribe/web/)** · No install, no sign-up, nothing uploaded. If SwarScribe saves you typing, a star helps the next person find it.
+**[Try the live demo in your browser](https://saifmodan2006.github.io/swarscribe/web/)** · **[Or send a voice note to the Telegram bot](https://t.me/swarscribe_bot)** · No install, no sign-up, nothing uploaded. If SwarScribe saves you typing, a star helps the next person find it.
 
 > Wispr Flow sends every word you say to the cloud, caps its free plan at 2,000 words a week, and charges for Command Mode. SwarScribe runs on your machine, has no caps, and treats those features as table stakes.
 
