@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="swar_paper">#F7F4ED</color>
+    <color name="swar_surface">#FFFDFA</color>
+    <color name="swar_ink">#231F1A</color>
+    <color name="swar_muted">#625B51</color>
+    <color name="swar_line">#DED7CB</color>
+    <color name="swar_accent">#A6331A</color>
+    <color name="swar_dark">#292520</color>
+    <color name="swar_peach">#FFB495</color>
+    <color name="swar_light_text">#FFF8ED</color>
+</resources>

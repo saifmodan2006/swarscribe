@@ -1,86 +1,110 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SwarScribe · Dictation Demo</title>
-<meta name="description" content="Try SwarScribe’s local text cleanup. Optional speech recognition uses your browser’s speech service.">
-<meta property="og:title" content="SwarScribe · Dictation Demo">
-<meta property="og:description" content="Try local text formatting with an optional browser microphone.">
-<meta property="og:image" content="https://saifmodan2006.github.io/swarscribe/assets/social-preview.svg">
-<link rel="icon" href="../assets/logo.svg" type="image/svg+xml">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SwarScribe · Voice dictation that runs locally</title>
+  <meta name="description" content="SwarScribe turns speech into editable text. Try the browser studio or set up local dictation on Windows and Android.">
+  <meta property="og:title" content="SwarScribe · Voice dictation that runs locally">
+  <meta property="og:description" content="Speak naturally. Edit less. Try SwarScribe's browser studio.">
+  <meta property="og:image" content="https://saifmodan2006.github.io/swarscribe/assets/social-preview.svg">
+  <meta name="theme-color" content="#f7f4ed">
+  <link rel="icon" href="../assets/logo.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
 </head>
 <body>
-<header class="hero">
-  <img class="logo" src="../assets/logo.svg" alt="SwarScribe logo">
-  <h1>Swar<span>Scribe</span></h1>
-  <p class="tag">Speak naturally. Get finished text.</p>
-  <p class="cta"><a class="btn primary" href="#try">Try the demo</a> <a class="btn" href="https://github.com/saifmodan2006/swarscribe#quick-start">Install SwarScribe</a></p>
-  <p class="proof">Text cleanup runs in this page. The optional browser mic may send audio to a speech provider. For offline speech recognition, use a downloaded desktop model or a supported Android on-device service.</p>
+<a href="#main" class="skip-link">Skip to content</a>
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main navigation">
+    <a class="brand" href="./"><img src="../assets/logo.svg" alt="" width="35" height="35">SwarScribe</a>
+    <div class="nav-links"><a href="#try">Studio</a><a href="#features">Features</a><a href="#download">Get the app</a></div>
+    <a class="nav-github" href="https://github.com/saifmodan2006/swarscribe">GitHub <span aria-hidden="true">↗</span></a>
+  </nav>
 </header>
+<main class="wrap" id="main">
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-copy">
+      <p class="kicker">Open-source voice dictation</p>
+      <h1 id="hero-title">Say it.<br><em>See it written.</em></h1>
+      <p class="lead">Speak naturally and get text you can use. SwarScribe runs speech models locally on your desktop and gives you control over what gets saved.</p>
+      <div class="row"><a class="button primary" href="#try">Try the studio <span aria-hidden="true">↘</span></a><a class="button" href="#download">Get SwarScribe</a></div>
+    </div>
+    <div class="hero-art">
+      <img src="../assets/studio-microphone.webp" width="1200" height="800" alt="" fetchpriority="high">
+      <div class="voice-card" aria-label="Example of cleaned dictation">
+        <img src="../assets/logo.svg" alt="" width="37" height="37">
+        <div><small>Dictation preview</small><p>Let’s move the review to 5:40 PM.</p></div>
+      </div>
+    </div>
+  </section>
 
-<main>
-  <section class="card" id="try">
-    <h2>Try it: dictate or paste a rough transcript</h2>
-    <p class="hint">Tap an example, or write your own rambling version:</p>
-    <p class="chips">
-      <button class="chip" data-example="um the meeting is on monday no wait tuesday at five thirty pm comma and uh please check my portfolio">Self-correction + time</button>
-      <button class="chip" data-example="my email is saif modan at gmail dot com and the launch is on fifteen november 2026">Email + date</button>
-      <button class="chip" data-example="first apples second bananas third oranges">Spoken list</button>
-      <button class="chip" data-example="hi team comma i can't ship today period the build is really very broken">Email style</button>
-    </p>
-    <textarea id="input" rows="4" aria-label="Raw transcript" placeholder="Speak with the mic button, or paste raw dictation here..."></textarea>
-    <div class="row">
-      <button id="mic" aria-describedby="mic-privacy">Start browser mic</button>
-      <label>Mic language <select id="language"><option value="en-IN">English</option><option value="hi-IN">Hindi</option></select></label>
-      <button id="clean" class="primary">Clean it up</button>
-      <label>Style
-        <select id="style">
-          <option value="">None</option>
-          <option value="formal">Formal</option>
-          <option value="casual">Casual</option>
-          <option value="email">Email</option>
-        </select>
-      </label>
-      <label><input type="checkbox" id="code"> Code mode</label>
+  <section class="studio" id="try" aria-labelledby="studio-title">
+    <div class="studio-top">
+      <div><p class="kicker">Interactive demo</p><h2 id="studio-title">Dictation studio</h2>
+      <p class="muted">Try an example, paste a transcript, or use your browser’s mic.</p></div>
+      <div class="chips" aria-label="Examples">
+        <button class="chip" data-example="um the review is on monday no wait tuesday at five forty pm">Reschedule a review</button>
+        <button class="chip" data-example="my email is saif modan at gmail dot com and the launch is on fifteen november 2026">Format an email</button>
+        <button class="chip" data-example="hi team comma i can't ship today period the build is really very broken">Polish a message</button>
+        <button class="chip" data-example="snake case user name equals five" data-code="true">Dictate code</button>
+      </div>
     </div>
-    <p class="hint" id="mic-privacy">Browser speech may use an online service. Paste or type text to skip microphone access.</p>
-    <h3>Clean output</h3>
-    <textarea id="output" rows="4" readonly aria-label="Clean output" placeholder="Clean text appears here..."></textarea>
-    <div class="row">
-      <button id="copy">Copy output</button>
-      <button id="clear">Clear text</button>
-      <span id="status" role="status" aria-live="polite">Enter text or try the browser mic.</span>
+    <div class="editors">
+      <div class="editor">
+        <label for="input">Raw transcript</label>
+        <textarea id="input" rows="6" placeholder="Start speaking or type something here…"></textarea>
+        <div class="row editor-actions">
+          <button id="mic" aria-describedby="mic-privacy">Start browser mic</button>
+          <label class="inline">Language <select id="language"><option value="en-IN">English</option><option value="hi-IN">Hindi</option></select></label>
+        </div>
+      </div>
+      <div class="editor output-editor">
+        <label for="output">Clean output</label>
+        <textarea id="output" rows="6" readonly placeholder="Your finished text appears here."></textarea>
+        <div class="row editor-actions"><button id="copy">Copy output</button><button class="quiet" id="clear">Clear text</button></div>
+      </div>
     </div>
-    <div class="row commands">
-      <span class="hint">Command Mode:</span>
+    <div class="studio-controls">
+      <div class="row">
+        <button id="clean" class="primary">Clean it up <span aria-hidden="true">→</span></button>
+        <label class="inline">Style <select id="style"><option value="">Default</option><option value="formal">Formal</option><option value="casual">Casual</option><option value="email">Email</option></select></label>
+        <label class="inline"><input type="checkbox" id="code"> Code mode</label>
+      </div>
+      <p id="status" role="status" aria-live="polite">Enter text or try the browser mic.</p>
+    </div>
+    <div class="row commands" aria-label="Edit the output">
+      <span>Quick edits</span>
       <button data-cmd="make it formal">Make it formal</button>
       <button data-cmd="make it shorter">Make it shorter</button>
       <button data-cmd="make it a list">Make it a list</button>
       <button data-cmd="uppercase">Uppercase</button>
     </div>
+    <div class="studio-foot">
+      <p id="mic-privacy">Text cleanup runs in this page. Browser speech recognition may send audio to your speech provider.</p>
+      <p class="counts"><strong id="stat-words">0</strong> words · <strong id="stat-edits">0</strong> edits this session</p>
+    </div>
   </section>
 
-  <section class="stats-band">
-    <div><strong id="stat-words">0</strong><span>words cleaned in this demo session</span></div>
-    <div><strong id="stat-edits">0</strong><span>edits SwarScribe made for you</span></div>
-    <div><strong>Local</strong><span>text formatting in this page</span></div>
+  <section class="features" id="features" aria-labelledby="features-title">
+    <div class="section-head"><h2 id="features-title">From voice to finished text.</h2><p class="muted">Choose a mode for what you’re writing. Keep your shortcuts, terms, and history close at hand.</p></div>
+    <div class="feature-grid">
+      <article><span class="feature-mark" aria-hidden="true">Aa</span><h3>Smart cleanup</h3><p>Format spoken punctuation, times, dates, and amounts. Use Normal Mode to stay closer to the original transcript.</p></article>
+      <article><span class="feature-mark" aria-hidden="true">“ ”</span><h3>Dictionary and snippets</h3><p>Teach SwarScribe how to spell names and technical terms. Turn a spoken phrase into text you reuse.</p></article>
+      <article><span class="feature-mark" aria-hidden="true">&lt;/&gt;</span><h3>Code Mode</h3><p>Dictate symbols, indentation, and identifier casing without applying prose cleanup to your code.</p></article>
+      <article><span class="feature-mark" aria-hidden="true">↺</span><h3>Command Mode</h3><p>Speak an editing command over a selection in a supported Windows editor, then review the replacement.</p></article>
+      <article><span class="feature-mark" aria-hidden="true">≡</span><h3>Meeting notes</h3><p>Turn a recording into timestamped Markdown with extractive highlights and action items.</p></article>
+      <article><span class="feature-mark" aria-hidden="true">↓</span><h3>Local models</h3><p>Download Whisper once and work from its local cache. Parakeet is available on supported NeMo setups.</p></article>
+    </div>
   </section>
 
-  <section class="grid">
-    <div class="card"><h3>Desktop speech</h3><p>Download a Whisper model for local inference on your computer. Parakeet is optional on supported NeMo setups.</p></div>
-    <div class="card"><h3>Smart formats</h3><p>Emails, websites, times, dates and amounts land written, not spelled out. "Five thirty pm" becomes 5:30 PM.</p></div>
-    <div class="card"><h3>Personal dictionary</h3><p>On desktop, add custom words and snippets in the local dashboard.</p></div>
-    <div class="card"><h3>Code Mode</h3><p>"Snake case user name equals five" becomes <code>user_name = 5</code>. Dictate code without fighting the engine.</p></div>
-    <div class="card"><h3>Meeting notes</h3><p>The CLI can turn a recorded WAV into timestamped text and extractive notes.</p></div>
-    <div class="card"><h3>Android keyboard</h3><p>Dictate on Android 12+ when a compatible offline speech service and language are installed. <a href="https://github.com/saifmodan2006/swarscribe/tree/main/android">Android setup and APK instructions</a>.</p></div>
+  <section class="downloads" id="download" aria-labelledby="download-title">
+    <div><p class="kicker">Install SwarScribe</p><h2 id="download-title">Write where you work.</h2></div>
+    <article><h3>Windows</h3><p>Use a global shortcut for dictation and manage your preferences in the local workspace.</p><a href="https://github.com/saifmodan2006/swarscribe/blob/main/docs/WINDOWS.md">Windows setup <span aria-hidden="true">↗</span></a></article>
+    <article><h3>Android</h3><p>Use the on-device keyboard on supported Android 12+ phones, or pair the companion with your desktop.</p><a href="https://github.com/saifmodan2006/swarscribe/tree/main/android">Android setup <span aria-hidden="true">↗</span></a></article>
   </section>
-
 </main>
-
-<footer><p>SwarScribe by <a href="https://www.devbysaif.in/">Saif Modan</a> - MIT licensed - <a href="https://github.com/saifmodan2006/swarscribe">GitHub</a></p></footer>
-<script src="app.js"></script>
+<footer class="wrap footer"><a class="brand" href="./"><img src="../assets/logo.svg" alt="" width="30" height="30">SwarScribe</a><p>MIT licensed · Made by <a href="https://www.devbysaif.in/">Saif Modan</a></p><a href="https://github.com/saifmodan2006/swarscribe">View source <span aria-hidden="true">↗</span></a></footer>
 </body>
 </html>

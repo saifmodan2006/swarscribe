@@ -6,6 +6,8 @@ import android.content.pm.PackageManager
 import android.inputmethodservice.InputMethodService
 import android.text.InputType
 import android.view.View
+import android.view.ContextThemeWrapper
+import android.view.LayoutInflater
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
 import android.widget.Button
@@ -40,24 +42,25 @@ class SwarKeyboardService : InputMethodService() {
     private fun ready(message: String) {
         target = null
         status?.text = message
-        mic?.text = "Dictate"
+        mic?.setText(R.string.keyboard_dictate)
         mic?.isEnabled = true
     }
 
     override fun onCreateInputView(): View {
         engine?.cancel()
-        val view = layoutInflater.inflate(R.layout.keyboard_view, null)
+        val themed = ContextThemeWrapper(this, R.style.Theme_SwarScribe)
+        val view = LayoutInflater.from(themed).inflate(R.layout.keyboard_view, null)
         status = view.findViewById(R.id.kbStatus)
         mic = view.findViewById(R.id.kbMic)
         val lang = view.findViewById<Button>(R.id.kbLanguage)
         val prefs = getSharedPreferences("dictation", MODE_PRIVATE)
         var hindi = prefs.getBoolean("keyboard_hindi", false)
-        lang.text = if (hindi) "Hindi" else "English"
+        lang.setText(if (hindi) R.string.language_hindi else R.string.language_english)
         lang.setOnClickListener {
             if (engine?.state == SpeechEngine.State.IDLE) {
                 hindi = !hindi
                 prefs.edit().putBoolean("keyboard_hindi", hindi).apply()
-                lang.text = if (hindi) "Hindi" else "English"
+                lang.setText(if (hindi) R.string.language_hindi else R.string.language_english)
             }
         }
         view.findViewById<Button>(R.id.kbSettings).setOnClickListener {
@@ -87,7 +90,7 @@ class SwarKeyboardService : InputMethodService() {
                 engine?.start(if (hindi) "hi-IN" else "en-IN")
                 if (engine?.state == SpeechEngine.State.LISTENING) {
                     status?.text = "Listening on this device…"
-                    mic?.text = "Stop recording"
+                    mic?.setText(R.string.stop_local_recording)
                 }
             }
         }
@@ -96,7 +99,7 @@ class SwarKeyboardService : InputMethodService() {
 
     override fun onFinishInputView(finishingInput: Boolean) {
         engine?.cancel()
-        ready("Ready for on-device dictation.")
+        ready(getString(R.string.keyboard_ready))
         super.onFinishInputView(finishingInput)
     }
 

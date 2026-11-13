@@ -1,6 +1,8 @@
 package com.swarscribe.app
 
 import android.Manifest
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -23,6 +25,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var local: Button
     private lateinit var desktop: Button
     private lateinit var diagnostics: Button
+    private lateinit var copy: Button
     private lateinit var language: Spinner
     private var capture: MicCapture? = null
     private var activeCapture: MicCapture? = null
@@ -47,12 +50,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun update(message: String) {
         status.text = message
-        local.text = if (engine.state == SpeechEngine.State.LISTENING) "Stop on-device recording" else "Dictate on device"
-        desktop.text = if (capture != null) "Stop and send to desktop" else "Dictate via paired desktop"
+        local.setText(if (engine.state == SpeechEngine.State.LISTENING) R.string.stop_local_recording else R.string.dictate_on_device)
+        desktop.setText(if (capture != null) R.string.stop_and_send else R.string.dictate_via_desktop)
         local.isEnabled = !busy && engine.state != SpeechEngine.State.PROCESSING
         desktop.isEnabled = capture != null || (!busy && engine.state == SpeechEngine.State.IDLE)
         diagnostics.isEnabled = !busy && engine.state == SpeechEngine.State.IDLE
         language.isEnabled = !busy && engine.state == SpeechEngine.State.IDLE
+        copy.isEnabled = output.text.isNotBlank()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,16 +67,26 @@ class MainActivity : AppCompatActivity() {
         local = findViewById(R.id.dictateButton)
         desktop = findViewById(R.id.serverButton)
         diagnostics = findViewById(R.id.checkConnection)
+        copy = findViewById(R.id.copyTranscript)
         language = findViewById(R.id.language)
         val url = findViewById<EditText>(R.id.serverUrl)
         val token = findViewById<EditText>(R.id.pairToken)
         val preferences = getSharedPreferences("dictation", MODE_PRIVATE)
         url.setText(preferences.getString("desktop", ""))
-        language.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item,
-            listOf("English", "Hindi", "Hindi + English (desktop auto)"))
+        language.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item,
+            listOf(R.string.language_english, R.string.language_hindi, R.string.language_mixed).map(::getString))
+            .apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
         language.setSelection(preferences.getInt("language", 0).coerceIn(0, 2))
         engine = SpeechEngine(this, { output.text = it; update("On-device transcript ready.") },
             { update(it) }, { update("Recognizing on this device…") })
+        copy.setOnClickListener {
+            val text = output.text
+            if (text.isNotBlank()) {
+                getSystemService(ClipboardManager::class.java).setPrimaryClip(
+                    ClipData.newPlainText(getString(R.string.transcript_title), text))
+                update(getString(R.string.transcript_copied))
+            }
+        }
         local.setOnClickListener {
             if (engine.state == SpeechEngine.State.LISTENING) engine.stop()
             else withMic {
@@ -152,7 +166,8 @@ class MainActivity : AppCompatActivity() {
                 update("Floating shortcut enabled. Tap it to open SwarScribe; hold it to dismiss.")
             }
         }
-        if (intent.getBooleanExtra(EXTRA_FROM_BUBBLE, false)) update("Choose a dictation mode to begin.")
+        update(if (intent.getBooleanExtra(EXTRA_FROM_BUBBLE, false)) "Choose a dictation mode to begin."
+               else getString(R.string.mobile_ready))
     }
 
     override fun onStop() {

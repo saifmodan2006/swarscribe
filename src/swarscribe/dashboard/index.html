@@ -3,41 +3,100 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SwarScribe · Local Dashboard</title>
+  <meta name="theme-color" content="#f7f4ed">
+  <title>SwarScribe · Local workspace</title>
   <link rel="stylesheet" href="/dashboard.css">
   <script src="/dashboard.js" defer></script>
 </head>
-<body><main>
-  <header><p class="eyebrow">SWARSCRIBE / DESKTOP</p><h1>Your dictation dashboard</h1>
-  <p>History, preferences and usage from this computer. This page has no external requests.</p></header>
-  <p id="status" role="status" aria-live="polite">Loading local data…</p>
-  <div id="panels" hidden>
-    <section aria-label="Usage" id="stats" class="grid"></section>
-    <section><h2>Dictation settings</h2>
-      <form id="settings" class="grid">
-        <label>Engine<select name="engine"><option>auto</option><option>whisper</option><option>parakeet</option></select></label>
-        <label>Whisper model<select name="model"><option value="">Default (base)</option><option>tiny</option><option>base</option><option>small</option><option>medium</option><option>large-v3</option><option>large-v3-turbo</option></select></label>
-        <label>Device<select name="device"><option>cpu</option><option>cuda</option><option>auto</option></select></label>
-        <label>Language<select name="language"><option value="">Auto detect</option><option value="en">English</option><option value="hi">Hindi</option><option value="hinglish">Hindi + English (auto)</option></select></label>
-        <label>Mode<select name="mode"><option>normal</option><option>smart</option><option>code</option><option>command</option><option>meeting</option></select></label>
-        <label>Style<select name="style"><option value="">Automatic (Windows)</option><option>plain</option><option>formal</option><option>casual</option><option>email</option><option>chat</option><option>document</option></select></label>
-        <label>Hotkey<input name="hotkey" required maxlength="60"></label>
-        <label>Optional local Ollama model<input name="ollama_model" maxlength="120" placeholder="e.g. llama3.1:8b"></label>
-        <label>Keep history for (days)<input name="history_days" type="number" min="1" max="365" required></label>
-        <label class="check"><input name="toggle" type="checkbox"> Tap to start / stop</label>
-        <label class="check"><input name="local_only" type="checkbox"> Use cached models only</label>
-        <label class="check"><input name="keep_history" type="checkbox"> Save new transcripts</label>
-        <button>Save settings</button>
-      </form>
-      <p class="muted">Restart the tray after changing the hotkey or toggle mode. Deletion and retention apply to transcripts; usage totals are separate.</p>
-    </section>
-    <section><h2>Recent dictation</h2>
-      <div class="actions"><form id="search"><input name="query" aria-label="Search history" placeholder="Find text" maxlength="200"><button>Search</button></form>
-      <a href="/history/export">Export Markdown</a><button id="clear" type="button">Clear transcripts</button></div>
-      <div id="history"></div>
-    </section>
-    <section><h2>Personal dictionary</h2><p>Map misheard words or phrases to the spelling you want.</p><div id="dictionary"></div></section>
-    <section><h2>Snippets</h2><p>Map a spoken phrase to a longer block of text.</p><div id="snippets"></div></section>
-    <section><h2>Models</h2><p class="muted">Download a Whisper model with <code>swarscribe model-download --engine whisper --model base</code>.</p><ul id="models"></ul></section>
-  </div>
-</main></body></html>
+<body>
+<a class="skip" href="#main">Skip to workspace</a>
+<div class="shell">
+  <aside>
+    <a class="brand" href="#overview" aria-label="SwarScribe overview"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>SwarScribe<small>Local workspace</small></span></a>
+    <nav aria-label="Workspace">
+      <a href="#overview" data-page="overview"><span aria-hidden="true">⌂</span>Overview</a>
+      <a href="#transcripts" data-page="transcripts"><span aria-hidden="true">≡</span>History</a>
+      <a href="#words" data-page="words"><span aria-hidden="true">Aa</span>Dictionary</a>
+      <a href="#phrases" data-page="phrases"><span aria-hidden="true">“ ”</span>Snippets</a>
+      <a href="#preferences" data-page="preferences"><span aria-hidden="true">⚙</span>Settings</a>
+      <a href="#speech-models" data-page="speech-models"><span aria-hidden="true">↓</span>Models</a>
+    </nav>
+    <div class="aside-note"><span class="dot"></span>Data on this computer</div>
+  </aside>
+
+  <main id="main">
+    <div class="topbar"><span id="breadcrumb">Workspace</span><button type="button" id="refresh" class="secondary" hidden>Refresh data</button></div>
+    <p id="status" role="status" aria-live="polite">Loading local data…</p>
+    <div id="panels" hidden>
+      <section class="page" id="overview">
+        <header><p class="kicker">Overview</p><h1>Your dictation dashboard</h1><p>Review recent dictation and see how you use SwarScribe.</p></header>
+        <div class="overview-card">
+          <div><p class="kicker">Windows shortcut</p><h2>Dictate into an editor</h2><p id="shortcut-help">Launch the Windows tray to start dictating.</p></div>
+          <div id="shortcut" class="shortcut" aria-label="Configured hotkey"></div>
+        </div>
+        <div id="stats" class="metrics" aria-label="Dictation usage"></div>
+        <div class="panel">
+          <div class="panel-title"><div><h2>Recent dictation</h2><p>Latest saved transcripts from this computer.</p></div><a class="text-link" href="#transcripts">View history <span aria-hidden="true">→</span></a></div>
+          <div id="recent"></div>
+        </div>
+      </section>
+
+      <section class="page" id="transcripts" hidden>
+        <header><h1>History</h1><p>Find, copy, or export text saved by SwarScribe.</p></header>
+        <div class="panel">
+          <div class="panel-title">
+            <form id="search" class="actions"><input type="search" name="query" aria-label="Search history" placeholder="Search transcripts" maxlength="200"><button class="secondary">Search</button></form>
+            <div class="actions"><a class="button secondary" href="/history/export">Export Markdown</a><button id="clear" class="danger" type="button">Clear history</button></div>
+          </div>
+          <div id="history"></div>
+        </div>
+      </section>
+
+      <section class="page" id="words" hidden>
+        <header><h1>Personal dictionary</h1><p>Teach SwarScribe how to spell names, places, and technical terms.</p></header>
+        <div class="panel"><div id="dictionary"></div></div>
+      </section>
+
+      <section class="page" id="phrases" hidden>
+        <header><h1>Snippets</h1><p>Replace a spoken phrase with a signature, a link, or any text you use often.</p></header>
+        <div class="panel"><div id="snippets"></div></div>
+      </section>
+
+      <section class="page" id="preferences" hidden>
+        <header><h1>Settings</h1><p>Choose how SwarScribe records, transcribes, and stores dictation.</p></header>
+        <form id="settings">
+          <fieldset class="panel"><legend>Speech and writing</legend>
+            <div class="fields">
+              <label>Engine<select name="engine"><option value="auto">Automatic</option><option value="whisper">Whisper</option><option value="parakeet">Parakeet</option></select></label>
+              <label>Whisper model<select name="model"><option value="">Default (base)</option><option>tiny</option><option>base</option><option>small</option><option>medium</option><option>large-v3</option><option>large-v3-turbo</option></select></label>
+              <label>Device<select name="device"><option value="cpu">CPU</option><option value="cuda">CUDA</option><option value="auto">Automatic</option></select></label>
+              <label>Language<select name="language"><option value="">Auto detect</option><option value="en">English</option><option value="hi">Hindi</option><option value="hinglish">Hindi + English (auto)</option></select></label>
+              <label>Mode<select name="mode"><option value="normal">Normal</option><option value="smart">Smart cleanup</option><option value="code">Code</option><option value="command">Command</option><option value="meeting">Meeting</option></select></label>
+              <label>Style<select name="style"><option value="">Automatic (Windows)</option><option value="plain">Plain</option><option value="formal">Formal</option><option value="casual">Casual</option><option value="email">Email</option><option value="chat">Chat</option><option value="document">Document</option></select></label>
+              <label>Local Ollama model <small>Optional, for rewriting commands</small><input name="ollama_model" maxlength="120" placeholder="e.g. llama3.1:8b"></label>
+              <label class="check"><input name="local_only" type="checkbox"> Use cached models only</label>
+            </div>
+          </fieldset>
+          <fieldset class="panel"><legend>Shortcut and history</legend>
+            <div class="fields">
+              <label>Hotkey<input name="hotkey" required maxlength="60"></label>
+              <label>History retention in days<input name="history_days" type="number" min="1" max="365" required></label>
+              <label class="check"><input name="toggle" type="checkbox"> Tap to start or stop</label>
+              <label class="check"><input name="keep_history" type="checkbox"> Save new transcripts</label>
+            </div>
+            <p class="help">Restart the Windows tray after changing the hotkey or toggle mode. Retention applies to transcripts. Usage totals are stored separately.</p>
+          </fieldset>
+          <button class="primary">Save settings</button>
+        </form>
+      </section>
+
+      <section class="page" id="speech-models" hidden>
+        <header><h1>Speech models</h1><p>See which models are available in your local cache.</p></header>
+        <div class="panel model-tip"><p>To download the default Whisper model, run</p><code id="model-command">swarscribe model-download --engine whisper --model base</code><button id="copy-command" type="button" class="secondary">Copy command</button></div>
+        <ul id="models" class="model-grid"></ul>
+      </section>
+    </div>
+  </main>
+</div>
+</body>
+</html>

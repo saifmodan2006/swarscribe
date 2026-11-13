@@ -127,6 +127,7 @@ def _main(argv: list[str] | None = None) -> int:
 
     p = sub.add_parser("tray", help="Run SwarScribe in the system tray")
     _speech_options(p)
+    p.add_argument("--background", action="store_true", help="Start with the status window hidden")
 
     pk = sub.add_parser("packs", help="Shareable dictionary/snippet packs")
     pksub = pk.add_subparsers(dest="packs_cmd", required=True)
@@ -237,7 +238,7 @@ def _main(argv: list[str] | None = None) -> int:
             print("Removed." if gone else "Not in the dictionary.")
     elif args.cmd == "tray":
         from .tray import run_tray
-        run_tray(_configured(args))
+        run_tray(_configured(args), background=args.background)
     elif args.cmd == "packs":
         from pathlib import Path as _Path
 

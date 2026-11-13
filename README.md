@@ -18,7 +18,7 @@ $ss = ".\.venv\Scripts\swarscribe.exe"
 & $ss tray
 ```
 
-Hold **Ctrl+Win** to record, then release either key in the chord to transcribe. **Esc** discards the current result. Open the tray dashboard to select a mode, language, model, device, or toggle hotkey. Restart the tray after editing the hotkey. Prefer a combination that the target app does not use. To use a chosen microphone, run `swarscribe app --hotkey --microphone 1` with the index from `swarscribe devices`. `swarscribe app` is the terminal workflow and prints output. See [Windows setup and troubleshooting](docs/WINDOWS.md).
+Hold **Ctrl+Win** to record, then release either key in the chord to transcribe. **Esc** discards the current result. The Windows status window shows the shortcut and recording state. Select **Open workspace** to change mode, language, model, device, or toggle mode. Restart the tray after editing the hotkey. To select a microphone, run `swarscribe app --hotkey --microphone 1` with the index from `swarscribe devices`. See [Windows setup and troubleshooting](docs/WINDOWS.md).
 
 Run `swarscribe dashboard` and open the printed URL (default `http://127.0.0.1:8000/`). The dashboard serves its own assets and exposes local usage, history search/delete/export, dictionary, snippets and preferences. Stats count dictations with text and estimate time saved against a 40 WPM baseline. They do not measure whether a target application accepted insertion.
 

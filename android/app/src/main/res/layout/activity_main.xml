@@ -1,109 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#0E1116">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/companionScroll"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/swar_paper" android:clipToPadding="false" android:fillViewport="true">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:paddingHorizontal="20dp" android:paddingTop="24dp" android:paddingBottom="28dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp">
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/app_name" android:textColor="@color/swar_accent" android:textStyle="bold" android:textSize="16sp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/mobile_title" android:textColor="@color/swar_ink" android:textSize="34sp" android:fontFamily="serif" android:layout_marginTop="8dp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/mobile_intro" android:textColor="@color/swar_muted" android:textSize="14sp" android:layout_marginTop="5dp" />
+        <TextView android:id="@+id/statusText" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="16dp" android:padding="14dp" android:background="@drawable/swar_status"
+            android:accessibilityLiveRegion="polite" android:text="@string/mobile_ready" android:textColor="@color/swar_light_text" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/app_title"
-            android:textColor="#FAF5EC"
-            android:textSize="30sp"
-            android:textStyle="bold" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:background="@drawable/swar_card" android:layout_marginTop="14dp" android:orientation="vertical" android:padding="16dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="@string/app_motto"
-            android:textColor="#FF5A36"
-            android:textSize="16sp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/mobile_record_title" android:textColor="@color/swar_ink" android:textSize="22sp" android:fontFamily="serif" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/mobile_record_help" android:textColor="@color/swar_muted" android:textSize="14sp" android:layout_marginTop="5dp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/speech_language" android:labelFor="@id/language" android:layout_marginTop="13dp" android:textStyle="bold" />
+        <Spinner android:id="@+id/language" android:layout_width="match_parent" android:layout_height="48dp"
+            android:contentDescription="@string/speech_language" />
+        <com.google.android.material.button.MaterialButton
+    android:id="@+id/dictateButton"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:layout_marginTop="8dp" android:text="@string/dictate_on_device"  />
+    </LinearLayout>
 
-        <TextView
-            android:id="@+id/statusText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/kb_ready"
-            android:textColor="#A7B0BE" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:background="@drawable/swar_card" android:layout_marginTop="14dp" android:orientation="vertical" android:padding="16dp">
 
-        <TextView
-            android:id="@+id/outputText"
-            android:textIsSelectable="true"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:background="#171B21"
-            android:minHeight="96dp"
-            android:padding="12dp"
-            android:textColor="#FAF5EC"
-            android:textSize="17sp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/transcript_title" android:textColor="@color/swar_ink" android:textSize="22sp" android:fontFamily="serif" />
+        <TextView android:id="@+id/outputText" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" android:minHeight="56dp" android:textIsSelectable="true"
+            android:hint="@string/transcript_empty" android:textColorHint="@color/swar_muted"
+            android:textColor="@color/swar_ink" android:textSize="16sp" />
+        <com.google.android.material.button.MaterialButton
+    android:id="@+id/copyTranscript" style="@style/Widget.SwarScribe.Secondary"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:layout_marginTop="8dp" android:text="@string/copy_transcript" android:enabled="false" />
+    </LinearLayout>
 
-        <Button
-            android:id="@+id/dictateButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/dictate_on_device" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:background="@drawable/swar_card" android:layout_marginTop="14dp" android:orientation="vertical" android:padding="16dp">
 
-        <Spinner
-            android:id="@+id/language"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:contentDescription="Recognition language" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/pair_title" android:textColor="@color/swar_ink" android:textSize="22sp" android:fontFamily="serif" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/pair_help" android:textColor="@color/swar_muted" android:textSize="14sp" android:layout_marginTop="5dp" />
+        <com.google.android.material.textfield.TextInputLayout style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="12dp" android:hint="@string/pair_url_label">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/serverUrl"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:inputType="textUri" android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" android:hint="@string/pair_token_label" app:endIconMode="password_toggle">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/pairToken"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:inputType="textPassword" android:saveEnabled="false" android:maxLines="1" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.button.MaterialButton
+    android:id="@+id/serverButton"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:layout_marginTop="8dp" android:text="@string/dictate_via_desktop"  />
+        <com.google.android.material.button.MaterialButton
+    android:id="@+id/checkConnection" style="@style/Widget.SwarScribe.Secondary"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:layout_marginTop="8dp" android:text="@string/check_pairing"  />
+    </LinearLayout>
 
-        <EditText
-            android:id="@+id/serverUrl"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:hint="@string/server_hint"
-            android:inputType="textUri"
-            android:textColor="#FAF5EC"
-            android:textColorHint="#A7B0BE" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:background="@drawable/swar_card" android:layout_marginTop="14dp" android:orientation="vertical" android:padding="16dp">
 
-        <EditText
-            android:id="@+id/pairToken"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Desktop pairing token (this session only)"
-            android:inputType="textPassword"
-            android:saveEnabled="false"
-            android:textColor="#FAF5EC"
-            android:textColorHint="#A7B0BE" />
-
-        <Button
-            android:id="@+id/checkConnection"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Check HTTPS pairing" />
-
-        <Button
-            android:id="@+id/serverButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/dictate_via_desktop" />
-
-        <Button
-            android:id="@+id/keyboardSettingsButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/enable_keyboard" />
-
-        <Button
-            android:id="@+id/bubbleButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/enable_bubble" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/keyboard_title" android:textColor="@color/swar_ink" android:textSize="22sp" android:fontFamily="serif" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/keyboard_help" android:textColor="@color/swar_muted" android:textSize="14sp" android:layout_marginTop="5dp" />
+        <com.google.android.material.button.MaterialButton
+    android:id="@+id/keyboardSettingsButton" style="@style/Widget.SwarScribe.Secondary"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:layout_marginTop="8dp" android:text="@string/enable_keyboard"  />
+        <com.google.android.material.button.MaterialButton
+    android:id="@+id/bubbleButton" style="@style/Widget.SwarScribe.Secondary"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:layout_marginTop="8dp" android:text="@string/enable_bubble"  />
+    </LinearLayout>
     </LinearLayout>
 </ScrollView>

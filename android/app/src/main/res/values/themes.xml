@@ -1,8 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.SwarScribe" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimary">#FF5A36</item>
-        <item name="colorSecondary">#0FA38C</item>
-        <item name="android:windowBackground">#0E1116</item>
+    <style name="Theme.SwarScribe" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/swar_accent</item>
+        <item name="colorSecondary">@color/swar_accent</item>
+        <item name="colorSurface">@color/swar_surface</item>
+        <item name="colorOnSurface">@color/swar_ink</item>
+        <item name="android:windowBackground">@color/swar_paper</item>
+        <item name="android:statusBarColor">@color/swar_paper</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:navigationBarColor">@color/swar_dark</item>
+        <item name="materialButtonStyle">@style/Widget.SwarScribe.Primary</item>
+    </style>
+    <style name="Widget.SwarScribe.Primary" parent="Widget.MaterialComponents.Button">
+        <item name="cornerRadius">12dp</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+    <style name="Widget.SwarScribe.Secondary" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="cornerRadius">12dp</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="strokeColor">@color/swar_line</item>
     </style>
 </resources>

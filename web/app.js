@@ -155,6 +155,7 @@ function clean(count = true) {
 document.querySelectorAll("[data-example]").forEach((chip) =>
   chip.addEventListener("click", () => {
     $("input").value = chip.dataset.example;
+    $("code").checked = chip.dataset.code === "true";
     clean();
   }));
 
@@ -200,8 +201,10 @@ if (SR) {
   const mic = $("mic");
   mic.addEventListener("click", () => {
     if (recognition) {
-      try { recognition.stop(); mic.disabled = true; status.textContent = "Recognizing…"; }
-      catch { status.textContent = "The browser mic could not stop."; }
+      mic.disabled = true;
+      status.textContent = "Recognizing…";
+      try { recognition.stop(); }
+      catch { mic.disabled = false; status.textContent = "The browser mic could not stop."; }
       return;
     }
     const rec = new SR();
