@@ -80,8 +80,10 @@ def run_desktop(config: Config, *, shutdown: Event | None = None,
     accepted = False
     last_edit = None
 
-    def key_event(key, pressed):
+    def key_event(key, pressed, injected=False):
         nonlocal accepted
+        if key is None or injected:
+            return
         key = listener.canonical(key)
         name = key.char if isinstance(key, keyboard.KeyCode) else key.name
         if not name:
@@ -151,8 +153,8 @@ def run_desktop(config: Config, *, shutdown: Event | None = None,
     def report(message):
         on_status(message)
 
-    listener = keyboard.Listener(on_press=lambda key: key_event(key, True),
-                                 on_release=lambda key: key_event(key, False))
+    listener = keyboard.Listener(on_press=lambda key, injected=False: key_event(key, True, injected),
+                                 on_release=lambda key, injected=False: key_event(key, False, injected))
     listener.start()
     report(f"Ready: {'tap to start/stop' if config.toggle else 'hold'} {config.hotkey}. Esc cancels.")
     try:
