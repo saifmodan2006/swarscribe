@@ -26,8 +26,9 @@ class BubbleService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (bubble == null && canDraw()) showBubble()
-        return START_STICKY
+        if (!canDraw()) stopSelf()
+        else if (bubble == null) showBubble()
+        return START_NOT_STICKY
     }
 
     private fun canDraw(): Boolean =
@@ -63,32 +64,37 @@ class BubbleService : Service() {
         var downX = 0f
         var downY = 0f
         var moved = false
+        var held = false
+        val dismiss = Runnable { held = true; stopSelf() }
         view.setOnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    downX = event.rawX; downY = event.rawY; moved = false
+                    downX = event.rawX; downY = event.rawY; moved = false; held = false
+                    v.postDelayed(dismiss, android.view.ViewConfiguration.getLongPressTimeout().toLong())
                     true
                 }
                 MotionEvent.ACTION_MOVE -> {
                     val dx = (event.rawX - downX).toInt()
                     val dy = (event.rawY - downY).toInt()
-                    if (kotlin.math.abs(dx) + kotlin.math.abs(dy) > 12) moved = true
+                    if (kotlin.math.abs(dx) + kotlin.math.abs(dy) > 12) {
+                        moved = true
+                        v.removeCallbacks(dismiss)
+                    }
                     params.x -= dx; params.y += dy
                     downX = event.rawX; downY = event.rawY
                     manager.updateViewLayout(v, params)
                     true
                 }
                 MotionEvent.ACTION_UP -> {
-                    if (!moved) openDictation()
+                    v.removeCallbacks(dismiss)
+                    if (!moved && !held) v.performClick()
                     true
                 }
+                MotionEvent.ACTION_CANCEL -> { v.removeCallbacks(dismiss); true }
                 else -> false
             }
         }
-        view.setOnLongClickListener {
-            stopSelf()
-            true
-        }
+        view.setOnClickListener { openDictation() }
         manager.addView(view, params)
         bubble = view
     }

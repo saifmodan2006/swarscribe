@@ -1,13 +1,10 @@
-# Security and Privacy
+# Security and privacy
 
-SwarScribe's security model is mostly a privacy model: in local mode your audio, transcripts, dictionary, snippets, history and analytics never leave your machine, so there is very little to leak.
+- The dashboard binds to loopback and validates the request host, peer and origin. It serves its own assets and does not enable CORS. Writes require a same-origin-capable custom header and JSON where applicable. This boundary protects against ordinary web origins; other programs on your computer can use the loopback API.
+- The separate pairing command requires an explicit interface, a TLS certificate/key, and a generated bearer token. Pairing exposes authenticated health and transcription only. It does not expose history, dictionary management, settings or API documentation. Keep the token and private key private, and rotate the token by restarting the service.
+- Audio uploads are bounded by body size, 6 MiB decoded size and 120 seconds of complete mono PCM16 WAV. The service admits one inference at a time. CLI-launched servers suppress access logs. Validation errors do not echo audio or request input.
+- Desktop speech runs on the machine after model setup. Browser speech recognition may send microphone audio to the browser vendor. Android on-device speech uses the system's on-device service; paired speech sends audio over HTTPS to the configured desktop. Hosted chat bots are a separate workflow and involve their messaging providers.
+- Settings, dictionary, snippets, optional transcript history and usage totals are plain JSON under `~/.swarscribe` or `SWARSCRIBE_HOME`. The dashboard can disable future history or delete existing transcripts. API/desktop audio may use a temporary WAV while the model runs; abrupt termination can leave temporary files. Meeting WAVs are saved only by explicit recording. Paired transcripts are not persisted by the pairing endpoint.
+- Local Ollama rewriting is opt-in and sends only the selected text to the local service on loopback. Review the preview before accepting a rewrite.
 
-## Reporting a problem
-
-Please open a GitHub issue for non-sensitive bugs. For anything that could expose a user's dictation data, contact the maintainer first through the portfolio contact form at https://www.devbysaif.in/ so a fix can land before details are public.
-
-## Notes for users
-
-- The optional LLM pass can be pointed at a local Ollama server (private) or a cloud endpoint (your key, your choice). SwarScribe defaults to no LLM at all.
-- Cloud transcription is never configured for you. The dual engines run locally; a backend only sends data if you install and choose one that does.
-- Your config lives at `~/.swarscribe/config.json`. It is a plain file: inspect it, back it up, delete it, it is yours.
+For a vulnerability involving sensitive data, contact the maintainer privately via the [project contact page](https://www.devbysaif.in/). Report ordinary bugs through GitHub Issues.

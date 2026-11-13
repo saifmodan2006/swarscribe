@@ -23,14 +23,16 @@ NUMBER_WORDS = {
 SYMBOLS = [
     ("open parenthesis", "("), ("close parenthesis", ")"),
     ("open bracket", "["), ("close bracket", "]"),
+    ("open curly brackets", "{"), ("close curly brackets", "}"),
+    ("open curly bracket", "{"), ("close curly bracket", "}"),
     ("open brace", "{"), ("close brace", "}"),
     ("greater than or equal", ">="), ("less than or equal", "<="),
     ("not equals", "!="), ("double equals", "=="),
     ("greater than", ">"), ("less than", "<"),
-    ("equals", "="), ("arrow", "->"), ("fat arrow", "=>"),
+    ("equals", "="), ("fat arrow", "=>"), ("arrow", "->"),
     ("plus", "+"), ("minus", "-"), ("star", "*"), ("slash", "/"),
     ("underscore", "_"), ("dot", "."), ("colon", ":"),
-    ("semicolon", ";"), ("comma", ","), ("pipe", "|"),
+    ("semicolon", ";"), ("comma", ", "), ("pipe", "|"),
     ("ampersand", "&"), ("hash", "#"), ("at sign", "@"),
 ]
 
@@ -62,16 +64,25 @@ def _apply_case_modes(text: str) -> str:
     return pat.sub(repl, text)
 
 
-def to_code(text: str) -> str:
-    """Convert dictated code speech into code-shaped text."""
-    if not text or not text.strip():
-        return ""
+def _code_line(text: str) -> str:
     out = _apply_case_modes(text.strip())
-    for phrase, symbol in SYMBOLS:
-        out = re.sub(rf"\s*\b{re.escape(phrase)}\b\s*",
-                     f" {symbol} " if symbol in ("=", "->", "=>", "+",
-                     "-", "*", "/", ">", "<", ">=", "<=", "!=", "==",
-                     "|", "&") else symbol, out, flags=re.I)
+    symbols = dict(SYMBOLS)
+    pattern = "|".join(re.escape(k) for k in sorted(symbols, key=len, reverse=True))
+    spaced = {"=", "->", "=>", "+", "-", "*", "/", ">", "<", ">=", "<=", "!=", "==", "|", "&"}
+    def symbol_for(match):
+        key = match[1].lower()
+        symbol = symbols[key]
+        if symbol in spaced:
+            return f" {symbol} "
+        if symbol == "{":
+            return " { "
+        if symbol == "}":
+            return " }"
+        if symbol in {")", "]", ":", ";"}:
+            return symbol + (" " if match[0][-1].isspace() else "")
+        return symbol
+    out = re.sub(rf"[ \t]*\b({pattern})\b[ \t]*", symbol_for, out, flags=re.I)
+    out = re.sub(r"^function definition\b", "def", out, flags=re.I)
     for word, digit in NUMBER_WORDS.items():
         out = re.sub(rf"\b{word}\b", digit, out, flags=re.I)
     out = re.sub(r"\(\s+", "(", out)
@@ -79,7 +90,19 @@ def to_code(text: str) -> str:
     out = re.sub(r"\s+\.", ".", out)
     out = re.sub(r"\s*:\s*$", ":", out.strip())
     out = re.sub(r"[ \t]{2,}", " ", out)
-    # Tidy "name = 5" spacing produced above.
-    out = re.sub(r"\s*=\s*", " = ", out)
-    out = re.sub(r"\s*->\s*", " -> ", out)
     return out.strip()
+
+
+def to_code(text: str) -> str:
+    """Convert spoken symbols and explicit indentation without prose cleanup."""
+    if not text.strip():
+        return ""
+    lines = []
+    for raw in re.split(r"\bnew line\b|\r?\n", text, flags=re.I):
+        raw = raw.strip()
+        prefix = ""
+        while match := re.match(r"(indent|tab)\b\s*", raw, re.I):
+            prefix += "    " if match[1].lower() == "indent" else "\t"
+            raw = raw[match.end():]
+        lines.append(prefix + _code_line(raw))
+    return "\n".join(lines)

@@ -12,6 +12,8 @@ import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
+from .storage import write_json
+
 TYPING_WPM = 40.0
 
 
@@ -68,8 +70,7 @@ class Analytics:
         }
 
     def save(self, path: str | Path) -> None:
-        Path(path).write_text(json.dumps(
-            [asdict(s) for s in self.sessions], indent=2))
+        write_json(path, [asdict(s) for s in self.sessions])
 
     @classmethod
     def load(cls, path: str | Path) -> "Analytics":

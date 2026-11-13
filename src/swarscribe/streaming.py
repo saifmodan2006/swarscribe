@@ -1,21 +1,13 @@
-"""Streaming dictation: words land while you are still speaking.
-
-The transcriber buffers incoming PCM chunks. Whenever a pause of
-``silence_ms`` or more is detected (energy VAD), the open segment is
-finalized: transcribed once and yielded as a final event. Between
-finalizations, ``poll_partial`` re-transcribes the open segment so a UI
-can show live partial text. Final text is stable and never rewritten,
-which is the contract a dictation UI actually needs.
-"""
+"""Bounded PCM chunk transcription with partial previews and final events."""
 
 from __future__ import annotations
 
 import array
-import io
 import wave
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from .recorder import AudioBuffer, SAMPLE_RATE
+from .transcribe import Transcript
 from .vad import frame_rms
 
 CHUNK_MS = 100
@@ -23,9 +15,12 @@ CHUNK_MS = 100
 
 @dataclass
 class StreamEvent:
-    kind: str          # "partial" or "final"
+    kind: str
     text: str
     segment: int
+    start_seconds: float = 0.0
+    end_seconds: float = 0.0
+    timing: str = "chunk"
 
 
 def _wav_bytes(samples: array.array, rate: int = SAMPLE_RATE) -> bytes:
@@ -35,85 +30,102 @@ def _wav_bytes(samples: array.array, rate: int = SAMPLE_RATE) -> bytes:
 
 
 class StreamingTranscriber:
-    """Feed PCM16 chunks, get partial and final transcript events."""
-
     def __init__(self, transcribe_wav, sample_rate: int = SAMPLE_RATE,
                  silence_ms: int = 700, min_segment_ms: int = 400,
-                 silence_threshold: float = 300.0):
-        # transcribe_wav: callable(bytes) -> str for one WAV segment
+                 silence_threshold: float = 300.0, max_segment_ms: int = 20000):
         self._transcribe = transcribe_wav
         self.rate = sample_rate
-        self.silence_ms = silence_ms
-        self.min_segment_ms = min_segment_ms
+        self._pause = sample_rate * silence_ms // 1000
+        self._minimum = sample_rate * min_segment_ms // 1000
+        self._limit = sample_rate * max_segment_ms // 1000
         self.threshold = silence_threshold
+        if not 0 < self._minimum <= self._limit or self._pause <= 0:
+            raise ValueError("Invalid segment duration limits.")
         self._open = array.array("h")
-        self._silence_run = 0
+        self._silent = 0
+        self._position = 0
         self._segment = 0
         self._last_partial = ""
 
-    def _chunk_is_silence(self, samples: array.array) -> bool:
-        return frame_rms(samples) < self.threshold
+    @property
+    def position(self) -> float:
+        return self._position / self.rate
 
     def feed(self, pcm: bytes) -> list[StreamEvent]:
-        """Add one chunk of PCM16 audio; returns any finalized events."""
         samples = array.array("h")
         samples.frombytes(pcm)
-        self._open.extend(samples)
-        chunk_ms = int(len(samples) / self.rate * 1000)
-        if self._chunk_is_silence(samples):
-            self._silence_run += max(chunk_ms, 1)
-        else:
-            self._silence_run = 0
-        events: list[StreamEvent] = []
-        open_ms = int(len(self._open) / self.rate * 1000)
-        if self._silence_run >= self.silence_ms and open_ms >= self.min_segment_ms:
-            event = self._finalize()
-            if event:
-                events.append(event)
+        events = []
+        cursor = 0
+        while cursor < len(samples):
+            count = min(self._limit - len(self._open), len(samples) - cursor)
+            part = samples[cursor:cursor + count]
+            cursor += count
+            self._position += count
+            quiet = frame_rms(part) < self.threshold
+            if not self._open and quiet:
+                continue
+            self._open.extend(part)
+            self._silent = self._silent + count if quiet else 0
+            if self._silent >= self._pause or len(self._open) >= self._limit:
+                events.extend(self.flush())
         return events
 
     def poll_partial(self) -> StreamEvent | None:
-        """Transcribe the open segment for a live preview, if it changed."""
-        if len(self._open) < self.rate * self.min_segment_ms // 1000:
+        if len(self._open) < self._minimum:
             return None
-        text = self._transcribe(_wav_bytes(self._open, self.rate)).strip()
+        output = self._transcribe(_wav_bytes(self._open, self.rate))
+        text = (output.text if isinstance(output, Transcript) else output).strip()
         if not text or text == self._last_partial:
             return None
         self._last_partial = text
-        return StreamEvent("partial", text, self._segment)
+        return StreamEvent("partial", text, self._segment,
+                           (self._position - len(self._open)) / self.rate, self.position)
 
-    def _finalize(self) -> StreamEvent | None:
-        samples = self._open
+    def cancel(self) -> None:
         self._open = array.array("h")
-        self._silence_run = 0
+        self._silent = 0
         self._last_partial = ""
-        if len(samples) < self.rate * self.min_segment_ms // 1000:
-            return None
-        text = self._transcribe(_wav_bytes(samples, self.rate)).strip()
-        self._segment += 1
-        if not text:
-            return None
-        return StreamEvent("final", text, self._segment - 1)
 
     def flush(self) -> list[StreamEvent]:
-        """Finalize whatever is left when the speaker stops."""
-        event = self._finalize()
-        return [event] if event else []
+        samples = self._open
+        start = (self._position - len(samples)) / self.rate
+        self.cancel()
+        if len(samples) < self._minimum:
+            return []
+        output = self._transcribe(_wav_bytes(samples, self.rate))
+        if isinstance(output, Transcript) and output.segments:
+            events = [StreamEvent("final", segment.text, self._segment, start + segment.start,
+                                  start + segment.end, "model")
+                      for segment in output.segments]
+        else:
+            text = (output.text if isinstance(output, Transcript) else output).strip()
+            events = [StreamEvent("final", text, self._segment, start, self.position)] if text else []
+        if events:
+            self._segment += 1
+        return events
+
+
+def iter_file_events(path: str, transcribe_wav, chunk_ms: int = CHUNK_MS,
+                     partial_every: float | None = None, **kwargs):
+    with wave.open(path, "rb") as handle:
+        if handle.getnchannels() != 1 or handle.getsampwidth() != 2:
+            raise ValueError("Chunked transcription requires a mono PCM16 WAV.")
+        rate = handle.getframerate()
+        frames = rate * chunk_ms // 1000
+        if frames <= 0:
+            raise ValueError("Chunk size is too small.")
+        streamer = StreamingTranscriber(transcribe_wav, sample_rate=rate, **kwargs)
+        last_poll = 0.0
+        while data := handle.readframes(frames):
+            yield from streamer.feed(data)
+            if partial_every and streamer.position - last_poll >= partial_every:
+                last_poll = streamer.position
+                event = streamer.poll_partial()
+                if event:
+                    yield event
+        yield from streamer.flush()
 
 
 def stream_file(path: str, transcribe_wav, chunk_ms: int = CHUNK_MS,
                 **kwargs) -> list[StreamEvent]:
-    """Replay a WAV file through the streamer (demos, tests, imports)."""
-    with wave.open(path, "rb") as handle:
-        rate = handle.getframerate()
-        frames_per_chunk = rate * chunk_ms // 1000
-        streamer = StreamingTranscriber(transcribe_wav, sample_rate=rate,
-                                        **kwargs)
-        events: list[StreamEvent] = []
-        while True:
-            data = handle.readframes(frames_per_chunk)
-            if not data:
-                break
-            events.extend(streamer.feed(data))
-        events.extend(streamer.flush())
-        return events
+    return list(iter_file_events(path, transcribe_wav, chunk_ms, **kwargs))

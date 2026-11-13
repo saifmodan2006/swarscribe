@@ -1,13 +1,14 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "swarscribe"
 version = "0.6.0"
-description = "Offline-first AI dictation that out-thinks Wispr Flow: dual-engine transcription, smart cleanup, command mode, code mode, meeting notes and analytics, 100 percent private by default."
+description = "Offline-first dictation with local speech recognition, text cleanup, and meeting notes."
 readme = "README.md"
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [{ name = "Saif Modan", email = "saifmodan000@gmail.com" }]
 requires-python = ">=3.10"
 keywords = ["dictation", "speech-to-text", "whisper", "parakeet",
@@ -15,22 +16,20 @@ keywords = ["dictation", "speech-to-text", "whisper", "parakeet",
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Topic :: Multimedia :: Sound/Audio :: Speech",
 ]
 dependencies = []
 
 [project.optional-dependencies]
-whisper = ["faster-whisper>=1.0", "av<15"]
-parakeet = ["nemo-toolkit[asr]"]
-api = ["fastapi>=0.110", "uvicorn>=0.29"]
+whisper = ["faster-whisper>=1.2.1,<2"]
+parakeet = ["nemo-toolkit[asr]>=2.4,<3", "av>=15"]
+api = ["fastapi>=0.115,<1", "pydantic>=2.7,<3", "uvicorn>=0.29,<1"]
 desktop = ["pynput", "pyperclip", "sounddevice", "soundfile", "numpy",
-           "pystray", "Pillow"]
+           "pystray", "Pillow", "comtypes; platform_system == 'Windows'"]
 llm = []
-all = ["faster-whisper>=1.0", "fastapi>=0.110", "uvicorn>=0.29",
-       "pynput", "pyperclip", "sounddevice", "soundfile", "numpy"]
-dev = ["pytest>=8"]
+all = ["swarscribe[whisper,api,desktop]"]
+dev = ["pytest>=8", "httpx>=0.28", "starlette>=0.44", "ruff", "build"]
 
 [project.scripts]
 swarscribe = "swarscribe.cli:main"
@@ -41,3 +40,6 @@ Portfolio = "https://www.devbysaif.in/"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+swarscribe = ["dashboard/*"]

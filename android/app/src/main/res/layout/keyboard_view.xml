@@ -2,25 +2,28 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#0E1116"
-    android:gravity="center"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="12dp">
 
     <TextView
         android:id="@+id/kbStatus"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/kb_ready"
-        android:textColor="#A7B0BE" />
+        android:accessibilityLiveRegion="polite"
+        android:text="Ready for on-device dictation." />
 
     <Button
         android:id="@+id/kbMic"
         android:layout_width="match_parent"
-        android:layout_height="72dp"
-        android:layout_marginTop="10dp"
-        android:backgroundTint="#FF5A36"
-        android:text="@string/kb_mic"
-        android:textColor="#FAF5EC"
-        android:textSize="18sp" />
+        android:layout_height="wrap_content"
+        android:text="Dictate" />
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content">
+        <Button android:id="@+id/kbLanguage" android:layout_width="0dp" android:layout_weight="1"
+            android:layout_height="wrap_content" android:text="English" />
+        <Button android:id="@+id/kbSettings" android:layout_width="0dp" android:layout_weight="1"
+            android:layout_height="wrap_content" android:text="Settings" />
+        <Button android:id="@+id/kbSwitch" android:layout_width="0dp" android:layout_weight="1"
+            android:layout_height="wrap_content" android:text="Switch keyboard" />
+    </LinearLayout>
 </LinearLayout>

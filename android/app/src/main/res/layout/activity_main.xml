@@ -36,6 +36,7 @@
 
         <TextView
             android:id="@+id/outputText"
+            android:textIsSelectable="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -52,6 +53,12 @@
             android:layout_marginTop="16dp"
             android:text="@string/dictate_on_device" />
 
+        <Spinner
+            android:id="@+id/language"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:contentDescription="Recognition language" />
+
         <EditText
             android:id="@+id/serverUrl"
             android:layout_width="match_parent"
@@ -61,6 +68,22 @@
             android:inputType="textUri"
             android:textColor="#FAF5EC"
             android:textColorHint="#A7B0BE" />
+
+        <EditText
+            android:id="@+id/pairToken"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Desktop pairing token (this session only)"
+            android:inputType="textPassword"
+            android:saveEnabled="false"
+            android:textColor="#FAF5EC"
+            android:textColorHint="#A7B0BE" />
+
+        <Button
+            android:id="@+id/checkConnection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Check HTTPS pairing" />
 
         <Button
             android:id="@+id/serverButton"

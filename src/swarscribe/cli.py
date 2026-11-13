@@ -13,7 +13,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import secrets
 import sys
+from dataclasses import asdict
+from pathlib import Path
 
 from .analytics import Analytics
 from .codemode import to_code
@@ -23,7 +27,7 @@ from .dictionary import PersonalDictionary
 from .meeting import analyse_meeting
 from .pipeline import Pipeline
 from .snippets import SnippetLibrary
-from .transcribe import choose_backend
+from .transcribe import BackendUnavailable, TranscriptionError
 
 
 def _pipeline(args) -> Pipeline:
@@ -39,7 +43,35 @@ def _pipeline(args) -> Pipeline:
                     analytics=Analytics())
 
 
+def _speech_options(parser):
+    parser.add_argument("--engine", choices=("auto", "whisper", "parakeet"))
+    parser.add_argument("--model")
+    parser.add_argument("--language")
+    parser.add_argument("--device", choices=("cpu", "cuda", "auto"))
+    parser.add_argument("--local-only", action="store_true", default=None)
+
+
+def _configured(args) -> Config:
+    config = Config.load()
+    fields = ("engine", "model", "language", "device", "local_only", "microphone", "mode", "toggle")
+    config._overrides = []
+    for field in fields:
+        value = getattr(args, field, None)
+        if value is not None:
+            setattr(config, field, value)
+            config._overrides.append(field)
+    return config
+
+
 def main(argv: list[str] | None = None) -> int:
+    try:
+        return _main(argv)
+    except (BackendUnavailable, TranscriptionError, RuntimeError, OSError, ValueError) as exc:
+        print(f"SwarScribe: {exc}", file=sys.stderr)
+        return 1
+
+
+def _main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="swarscribe",
                                      description="Offline-first AI dictation")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -65,10 +97,11 @@ def main(argv: list[str] | None = None) -> int:
 
     p = sub.add_parser("transcribe", help="Transcribe an audio file")
     p.add_argument("file")
-    p.add_argument("--engine", default="auto")
-    p.add_argument("--language", default=None)
+    _speech_options(p)
+    p.add_argument("--chunks", action="store_true",
+                   help="Emit JSON Lines partial/final events from a mono PCM16 WAV")
 
-    p = sub.add_parser("translate", help="Translate text (phrasebook + optional LLM)")
+    p = sub.add_parser("translate", help="Look up a phrase in the limited English/Hindi phrasebook")
     p.add_argument("text")
     p.add_argument("--from-lang", default="en")
     p.add_argument("--to-lang", default="hi")
@@ -76,8 +109,10 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("stats", help="Show dictation analytics summary")
 
     p = sub.add_parser("app", help="Run the desktop dictation app")
-    p.add_argument("--engine", default="auto")
-    p.add_argument("--model", default=None)
+    _speech_options(p)
+    p.add_argument("--microphone", type=int)
+    p.add_argument("--mode", choices=("normal", "smart", "code", "command", "meeting"))
+    p.add_argument("--toggle", action="store_true", default=None)
     p.add_argument("--hotkey", action="store_true",
                    help="Hold a global hotkey anywhere instead of Enter")
 
@@ -91,8 +126,7 @@ def main(argv: list[str] | None = None) -> int:
     pr.add_argument("heard")
 
     p = sub.add_parser("tray", help="Run SwarScribe in the system tray")
-    p.add_argument("--engine", default="auto")
-    p.add_argument("--model", default=None)
+    _speech_options(p)
 
     pk = sub.add_parser("packs", help="Shareable dictionary/snippet packs")
     pksub = pk.add_subparsers(dest="packs_cmd", required=True)
@@ -107,16 +141,29 @@ def main(argv: list[str] | None = None) -> int:
                        help="Turn a meeting WAV into timestamped notes")
     p.add_argument("wav")
     p.add_argument("--out", default="meeting-notes.md")
-    p.add_argument("--engine", default="auto")
-    p.add_argument("--model", default=None)
+    _speech_options(p)
+    p.add_argument("--record", action="store_true",
+                   help="Capture microphone audio and save it to the WAV path before generating notes")
+    p.add_argument("--microphone", type=int)
 
     p = sub.add_parser("history", help="Show or export dictation history")
     p.add_argument("--export", action="store_true",
                    help="Print the session as Markdown")
     p.add_argument("--undo", action="store_true",
                    help="Remove the most recent entry")
+    p.add_argument("--search", default="")
 
     sub.add_parser("models", help="List speech models and downloads")
+    sub.add_parser("devices", help="List PortAudio devices and indices")
+    p = sub.add_parser("model-download", help="Download and initialize a speech model")
+    _speech_options(p)
+    sub.add_parser("pair-token", help="Generate a private Android pairing token")
+    p = sub.add_parser("pair-serve", help="Serve speech on a trusted HTTPS address")
+    p.add_argument("--bind", required=True, help="Local IPv4 address to listen on")
+    p.add_argument("--hostname", required=True, help="DNS name or IPv4 address on the TLS certificate")
+    p.add_argument("--cert", required=True)
+    p.add_argument("--key", required=True)
+    p.add_argument("--port", type=int, default=8443)
 
     p = sub.add_parser("dashboard", help="Serve the local dashboard API")
     p.add_argument("--port", type=int, default=8000)
@@ -141,28 +188,36 @@ def main(argv: list[str] | None = None) -> int:
             notes = analyse_meeting(fh.read())
         print(notes.to_markdown())
     elif args.cmd == "transcribe":
-        backend = choose_backend(args.engine, args.language)
-        transcript = backend.transcribe(args.file, args.language)
-        result = _pipeline(args).process(transcript.text)
-        print(json.dumps({"engine": transcript.engine,
-                          "raw": transcript.text,
-                          "clean": result.text}, indent=2))
+        from .app import process_dictation
+        from .transcribe import transcribe_wav_bytes
+        config = _configured(args)
+        backend = config.backend()
+        if args.chunks:
+            from .streaming import iter_file_events
+            for event in iter_file_events(
+                    args.file, lambda wav: transcribe_wav_bytes(wav, backend, config.language),
+                    partial_every=1.5):
+                print(json.dumps(asdict(event)), flush=True)
+        else:
+            transcript = backend.transcribe(args.file, config.language)
+            if not transcript.text.strip():
+                raise TranscriptionError("No speech was recognized.")
+            print(json.dumps({"engine": transcript.engine, "language": transcript.language,
+                              "raw": transcript.text, "segments": [asdict(s) for s in transcript.segments],
+                              "clean": process_dictation(transcript.text, config)}, indent=2))
     elif args.cmd == "translate":
         from .translate import translate_text
         print(translate_text(args.text, args.from_lang, args.to_lang))
     elif args.cmd == "stats":
-        print(json.dumps(Analytics().summary(), indent=2))
+        from .app import build_pipeline
+        print(json.dumps(build_pipeline()[2].summary(), indent=2))
     elif args.cmd == "app":
         if args.hotkey:
             from .desktop import run_desktop
-            from .transcribe import choose_backend
-            config = Config.load()
-            run_desktop(_pipeline(args),
-                        choose_backend(args.engine, model=args.model),
-                        hotkey=config.hotkey)
+            run_desktop(_configured(args))
         else:
             from .app import run_app
-            run_app(engine=args.engine, model=args.model)
+            run_app(config=_configured(args))
     elif args.cmd == "dict":
         config = Config.load()
         if args.dict_cmd == "list":
@@ -181,13 +236,8 @@ def main(argv: list[str] | None = None) -> int:
             config.save()
             print("Removed." if gone else "Not in the dictionary.")
     elif args.cmd == "tray":
-        from .desktop import run_desktop  # noqa: F401  (warm import)
-        from .transcribe import choose_backend
         from .tray import run_tray
-        config = Config.load()
-        run_tray(_pipeline(args),
-                 choose_backend(args.engine, model=args.model),
-                 hotkey=config.hotkey)
+        run_tray(_configured(args))
     elif args.cmd == "packs":
         from pathlib import Path as _Path
 
@@ -215,11 +265,15 @@ def main(argv: list[str] | None = None) -> int:
             print(f"Imported '{pack.name}': {added} new entries.")
     elif args.cmd == "meeting-record":
         from .meeting_recorder import save_meeting_notes
-        from .transcribe import choose_backend, transcribe_wav_bytes
-        backend = choose_backend(args.engine, model=args.model)
+        from .transcribe import transcribe_wav_bytes
+        config = _configured(args)
+        backend = config.backend()
+        if args.record:
+            from .meeting_recorder import capture_meeting
+            capture_meeting(args.wav, config.microphone)
         path = save_meeting_notes(
             args.wav,
-            lambda data: transcribe_wav_bytes(data, backend=backend).text,
+            lambda data: transcribe_wav_bytes(data, backend, config.language),
             args.out)
         print(f"Meeting notes written: {path}")
     elif args.cmd == "history":
@@ -227,6 +281,7 @@ def main(argv: list[str] | None = None) -> int:
         from .history import History
         path = state_dir() / "history.json"
         history = History.load(path) if path.exists() else History()
+        history.prune(Config.load().history_days)
         if args.undo:
             gone = history.undo()
             history.save(path)
@@ -236,11 +291,49 @@ def main(argv: list[str] | None = None) -> int:
         else:
             if not history.entries:
                 print("No dictations yet. Run: swarscribe app")
-            for entry in history.entries[-10:]:
+            entries = [entry for entry in history.entries
+                       if args.search.casefold() in entry.text.casefold()]
+            for entry in entries[-10:]:
                 print("-", entry.text)
     elif args.cmd == "models":
         from .models import status
         print(json.dumps(status(), indent=2))
+    elif args.cmd == "devices":
+        try:
+            import sounddevice
+        except ImportError as exc:
+            raise RuntimeError("Install the desktop extra to list audio devices.") from exc
+        print(sounddevice.query_devices())
+    elif args.cmd == "model-download":
+        config = _configured(args)
+        config.local_only = False
+        print(f"Ready: {config.backend().name}")
+    elif args.cmd == "pair-token":
+        print(secrets.token_urlsafe(32))
+    elif args.cmd == "pair-serve":
+        import ipaddress
+        import re
+        import ssl
+        try:
+            import uvicorn
+            from .api import create_app
+        except ImportError as exc:
+            raise RuntimeError("Install 'swarscribe[api]' to start pairing.") from exc
+        ip = ipaddress.IPv4Address(args.bind)
+        if ip.is_unspecified or ip.is_multicast:
+            raise ValueError("Specify the actual desktop interface address, such as 192.168.1.15.")
+        hostname = args.hostname.lower()
+        if not re.fullmatch(r"[a-z0-9][a-z0-9.-]{0,252}", hostname):
+            raise ValueError("Specify the certificate hostname without a URL scheme or port.")
+        token = os.getenv("SWARSCRIBE_PAIR_TOKEN", "")
+        if not re.fullmatch(r"[A-Za-z0-9_-]{32,128}", token):
+            raise ValueError("Set SWARSCRIBE_PAIR_TOKEN to the output of swarscribe pair-token.")
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        context.load_cert_chain(Path(args.cert), Path(args.key))
+        paired = create_app(lan_token=token, lan_hostname=hostname)
+        print(f"Android pairing: https://{hostname}:{args.port}")
+        uvicorn.run(paired, host=str(ip), port=args.port, ssl_certfile=args.cert,
+                    ssl_keyfile=args.key, access_log=False, proxy_headers=False, ws="none")
     elif args.cmd == "dashboard":
         try:
             import uvicorn
@@ -248,9 +341,9 @@ def main(argv: list[str] | None = None) -> int:
             print("Dashboard needs the api extra: "
                   "pip install 'swarscribe[api]'")
             return 1
-        print(f"Dashboard API: http://127.0.0.1:{args.port}/docs")
-        print("Stats: /stats  Models: /models  Dictionary: /dictionary")
-        uvicorn.run("swarscribe.api:app", port=args.port)
+        print(f"Dashboard: http://127.0.0.1:{args.port}/")
+        uvicorn.run("swarscribe.api:app", host="127.0.0.1", port=args.port,
+                    access_log=False, proxy_headers=False, ws="none")
     return 0
 
 

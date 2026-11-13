@@ -1,15 +1,14 @@
 name: Android
-
 on:
   push:
     branches: [main]
-    paths:
-      - "android/**"
-      - ".github/workflows/android.yml"
+    paths: ["android/**", ".github/workflows/android.yml"]
   pull_request:
-    paths:
-      - "android/**"
+    paths: ["android/**", ".github/workflows/android.yml"]
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -20,14 +19,18 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.9"
-      - name: Build debug APK
+      - name: Test and build Android
         working-directory: android
-        run: gradle assembleDebug --stacktrace
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+        run: gradle testDebugUnitTest lintDebug assembleDebug assembleRelease assembleDebugAndroidTest
+      - name: Verify debug APK signature
+        run: '"$ANDROID_HOME/build-tools/34.0.0/apksigner" verify android/app/build/outputs/apk/debug/app-debug.apk'
+      - uses: actions/upload-artifact@v4
         with:
           name: swarscribe-debug-apk
-          path: android/app/build/outputs/apk/debug/*.apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

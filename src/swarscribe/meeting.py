@@ -33,7 +33,7 @@ class MeetingNotes:
         actions = [f"[ ] {i}" for i in self.action_items]
         return "\n".join([
             "# Meeting Notes", "",
-            section("Summary", self.summary),
+            section("Extractive Summary", self.summary),
             section("Decisions", self.decisions),
             section("Action Items", actions),
         ])
@@ -55,9 +55,9 @@ def analyse_meeting(transcript: str, summary_limit: int = 3) -> MeetingNotes:
             notes.action_items.append(s)
     # Summary = the longest, most content-rich remaining sentences,
     # kept in original order. Simple and deterministic offline.
-    rest = [s for s in sentences
-            if s not in notes.decisions and s not in notes.action_items]
+    marked = set(notes.decisions + notes.action_items)
+    rest = [s for s in sentences if s not in marked]
     ranked = sorted(rest, key=lambda s: len(s.split()), reverse=True)
-    chosen = ranked[:summary_limit]
+    chosen = set(ranked[:summary_limit])
     notes.summary = [s for s in rest if s in chosen]
     return notes

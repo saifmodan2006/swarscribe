@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import re
 
-from .cleanup import _remove_fillers
+from .cleanup import _remove_fillers, clean_text
 from .styles import apply_style
 
 INTENSIFIERS = ["very", "really", "just", "actually", "basically",
@@ -45,7 +45,8 @@ KNOWN_COMMANDS = (
     "make it formal", "make formal", "formal", "make it casual",
     "make casual", "casual", "make it shorter", "shorten it",
     "shorten", "make shorter", "make it a list", "make a list",
-    "bullet list", "turn it into a list", "uppercase", "lowercase",
+    "bullet list", "turn it into a list", "convert to bullet points", "uppercase", "lowercase",
+    "fix punctuation", "summarize this",
     "title case", "remove fillers", "clean it up", "clean up",
     "add a greeting", "sign off", "add sign off", "add a sign off",
 )
@@ -73,7 +74,12 @@ def apply_command(text: str, command: str) -> str:
         return apply_style(text, "casual")
     if cmd in ("make it shorter", "shorten it", "shorten", "make shorter"):
         return _shorten(text)
-    if cmd in ("make it a list", "make a list", "bullet list",
+    if cmd == "fix punctuation":
+        return clean_text(text)
+    if cmd == "summarize this":
+        from .meeting import analyse_meeting
+        return " ".join(analyse_meeting(text).summary) or text
+    if cmd in ("make it a list", "make a list", "bullet list", "convert to bullet points",
                "turn it into a list"):
         return _bullet_list(text)
     if cmd == "uppercase":

@@ -15,8 +15,7 @@ object Cleanup {
         "you know what i mean", "at the end of the day", "like i said"
     )
     private val fillers = setOf(
-        "um", "uh", "erm", "hmm", "like", "basically", "actually",
-        "literally", "right", "so", "well", "okay so"
+        "um", "uh", "erm", "hmm"
     )
     private val spokenPunctuation = linkedMapOf(
         "full stop" to ".", "period" to ".", "comma" to ",",
@@ -34,7 +33,7 @@ object Cleanup {
     )
 
     fun clean(raw: String): String {
-        var text = " " + raw.lowercase().trim() + " "
+        var text = " " + raw.trim() + " "
         for (phrase in fillerPhrases) text = text.replace(" $phrase ", " ")
         text = resolveSelfCorrections(text)
         val tokens = text.trim().split(Regex("\\s+")).filter { it.isNotEmpty() }
@@ -42,9 +41,8 @@ object Cleanup {
         var i = 0
         while (i < tokens.size) {
             val pair = if (i + 1 < tokens.size) tokens[i] + " " + tokens[i + 1] else ""
-            if (pair in fillers) { i += 2; continue }
-            if (tokens[i] in fillers) { i += 1; continue }
-            if (kept.isNotEmpty() && kept.last() == tokens[i]) { i += 1; continue }
+            if (pair.lowercase() in fillers) { i += 2; continue }
+            if (tokens[i].trimEnd(',', '.').lowercase() in fillers) { i += 1; continue }
             kept.add(tokens[i]); i += 1
         }
         text = " " + kept.joinToString(" ") + " "
@@ -66,12 +64,12 @@ object Cleanup {
         // word (and anything between it and the marker) when the word
         // after the marker replaces it.
         var out = text
-        for (marker in listOf("no wait", "wait no", "sorry", "i mean")) {
-            val pattern = Regex("(\\w+(?: \\w+){0,3}) " + Regex.escape(marker) + " (\\w+)")
+        for (marker in listOf("no wait", "wait no")) {
+            val pattern = Regex("\\b\\w+,? " + Regex.escape(marker) + ",? (\\w+)", RegexOption.IGNORE_CASE)
             var prev: String
             do {
                 prev = out
-                out = pattern.replace(out) { m -> m.groupValues[2] }
+                out = pattern.replace(out) { m -> m.groupValues[1] }
             } while (out != prev)
         }
         return out
@@ -80,7 +78,7 @@ object Cleanup {
     private fun capitaliseCalendar(text: String): String {
         var out = text
         for (day in weekdays + months) {
-            out = Regex("\\b$day\\b").replace(out) {
+            out = Regex("\\b${day}\\b", RegexOption.IGNORE_CASE).replace(out) {
                 day.replaceFirstChar { c -> c.uppercase() }
             }
         }

@@ -1,21 +1,11 @@
-# One-click installers
+# Optional standalone text CLI
 
-SwarScribe should not need a Python course to install. These packaging
-files build a single-file executable of the CLI and desktop core:
+Build from a clean Python environment. The executable runs text cleanup, rule commands, Code Mode and other text-only CLI tools. Use the full Python installation described in the [quick start](../README.md#quick-start) for microphone recording, inference, the tray, and the dashboard.
 
-- **Linux:** `./packaging/build-linux.sh` produces `dist/swarscribe`.
-  Verified: the Linux binary is built and smoke-tested in this repo's
-  development environment.
-- **Windows:** `packaging\build-windows.bat` produces
-  `dist\swarscribe.exe`; compile `packaging/swarscribe.iss` with
-  Inno Setup 6 to get a proper `SwarScribe-Setup.exe` with Start Menu
-  entries. Build it on any Windows machine in about two minutes.
-- **macOS:** the same PyInstaller spec works
-  (`python3 -m PyInstaller packaging/swarscribe.spec`); wrap the result
-  in a .app/dmg with your usual tooling. Not yet code-signed, so
-  Gatekeeper will ask once.
+```powershell
+python -m pip install -e . pyinstaller
+python -m PyInstaller packaging/swarscribe.spec --noconfirm
+.\dist\swarscribe.exe clean "um hello world"
+```
 
-Speech models are not bundled (they are hundreds of MB); the app
-downloads the chosen model on first use, exactly like the pip install.
-Everything else, cleanup, dictionary, Code Mode, bots and the API,
-travels inside the single file.
+The Windows artifact is unsigned. If Windows Application Control blocks it, use the Python entry point or an approved environment. The optional Inno Setup definition installs the text CLI; it does not install Python speech dependencies or model weights. On Linux, use `python3 -m PyInstaller packaging/swarscribe.spec --noconfirm` from the project directory.

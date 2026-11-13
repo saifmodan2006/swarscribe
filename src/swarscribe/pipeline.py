@@ -30,7 +30,9 @@ def _edit_stats(raw: str, text: str) -> dict:
     """How much work the pipeline just saved the user, in numbers."""
     import difflib
     a, b = raw.lower().split(), text.lower().split()
-    matcher = difflib.SequenceMatcher(a=a, b=b, autojunk=False)
+    if max(len(a), len(b)) > 2000:
+        return {"raw_words": len(a), "clean_words": len(b), "edits_made": None}
+    matcher = difflib.SequenceMatcher(a=a, b=b)
     changed = sum(max(i2 - i1, j2 - j1)
                   for tag, i1, i2, j1, j2 in matcher.get_opcodes()
                   if tag != "equal")
@@ -70,10 +72,11 @@ class Pipeline:
 
     def process(self, raw: str, *, app: str | None = None,
                 style: str | None = None, code_mode: bool = False,
-                seconds: float | None = None) -> Result:
+                seconds: float | None = None, cleanup: bool = True) -> Result:
         stages = []
-        text = clean_text(raw)
-        stages.append("cleanup")
+        text = clean_text(raw) if cleanup and not code_mode else raw.strip()
+        if cleanup and not code_mode:
+            stages.append("cleanup")
         if self.dictionary.entries:
             text = self.dictionary.apply(text)
             stages.append("dictionary")
@@ -85,7 +88,7 @@ class Pipeline:
             text = to_code(text)
             mode = "code"
             stages.append("code-mode")
-        chosen_style = style or style_for_app(app)
+        chosen_style = None if code_mode else style or style_for_app(app)
         if chosen_style:
             text = apply_style(text, chosen_style)
             stages.append(f"style:{chosen_style}")

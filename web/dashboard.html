@@ -1,79 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SwarScribe Dashboard</title>
-<link rel="icon" href="../assets/logo.svg">
-<style>
-  :root { --bg:#0E1116; --card:#171B21; --ink:#FAF5EC; --mut:#A7B0BE;
-          --acc:#FF5A36; --acc2:#FFB43A; --teal:#0FA38C; }
-  body { margin:0; font-family:Segoe UI, Arial, sans-serif; background:var(--bg); color:var(--ink); }
-  main { max-width:880px; margin:0 auto; padding:28px 18px 60px; }
-  h1 { font-size:30px; } h1 span { color:var(--acc); }
-  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin:18px 0; }
-  .card { background:var(--card); border-radius:14px; padding:16px; }
-  .card b { display:block; font-size:28px; color:var(--acc2); }
-  .card small { color:var(--mut); }
-  table { width:100%; border-collapse:collapse; } td, th { text-align:left; padding:7px 6px; border-bottom:1px solid #22262E; }
-  .ok { color:var(--teal); } .no { color:var(--mut); }
-  code { color:var(--acc2); }
-  p.note { color:var(--mut); }
-</style>
-</head>
-<body>
+<title>SwarScribe · Local Dashboard</title>
+<link rel="stylesheet" href="style.css">
 <main>
-  <h1>Swar<span>Scribe</span> Dashboard</h1>
-  <p class="note">Your dictation life, on your machine only. This page reads the local
-  API (<code>swarscribe dashboard</code>). Nothing here is uploaded anywhere.</p>
-
-  <div class="grid">
-    <div class="card"><b id="words">-</b><small>words dictated</small></div>
-    <div class="card"><b id="sessions">-</b><small>dictations</small></div>
-    <div class="card"><b id="wpm">-</b><small>average speaking WPM</small></div>
-    <div class="card"><b id="saved">-</b><small>minutes saved vs typing</small></div>
-  </div>
-
-  <h2>Speech models</h2>
-  <table><thead><tr><th>Model</th><th>Engine</th><th>Size</th><th>Downloaded</th></tr></thead>
-  <tbody id="models"></tbody></table>
-
-  <h2>Personal dictionary</h2>
-  <table><thead><tr><th>Heard</th><th>Written as</th></tr></thead>
-  <tbody id="dict"></tbody></table>
-
-  <p class="note" id="err"></p>
+  <h1>SwarScribe Dashboard</h1>
+  <p>The dashboard is served from your computer. Run <code>swarscribe dashboard</code>
+  and open the loopback URL printed by the command.</p>
+  <p><a href="./">Back to the browser demo</a></p>
 </main>
-<script>
-  const api = location.port === "8000" ? "" : "http://127.0.0.1:8000";
-  async function load(path) {
-    const r = await fetch(api + path);
-    if (!r.ok) throw new Error(path + " " + r.status);
-    return r.json();
-  }
-  (async () => {
-    try {
-      const s = await load("/stats");
-      document.getElementById("words").textContent = s.total_words ?? 0;
-      document.getElementById("sessions").textContent = s.sessions ?? 0;
-      document.getElementById("wpm").textContent = Math.round(s.average_wpm ?? 0);
-      document.getElementById("saved").textContent =
-        Math.round((s.total_minutes_saved ?? 0) * 10) / 10;
-      const m = await load("/models");
-      document.getElementById("models").innerHTML = m.models.map(x =>
-        "<tr><td>" + x.name + "</td><td>" + x.engine + "</td><td>" +
-        x.size_mb + " MB</td><td class='" + (x.downloaded ? "ok" : "no") +
-        "'>" + (x.downloaded ? "yes" : "not yet") + "</td></tr>").join("");
-      const d = await load("/dictionary");
-      const rows = Object.entries(d.entries || {});
-      document.getElementById("dict").innerHTML = rows.length
-        ? rows.map(([a, b]) => "<tr><td>" + a + "</td><td>" + b + "</td></tr>").join("")
-        : "<tr><td colspan='2'>No entries yet. SwarScribe learns from your edits.</td></tr>";
-    } catch (e) {
-      document.getElementById("err").textContent =
-        "Could not reach the local API. Start it with: swarscribe dashboard";
-    }
-  })();
-</script>
-</body>
 </html>

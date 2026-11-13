@@ -10,7 +10,7 @@ Here is where each one stands today.
 | Price | Free plan capped, Pro about $12 to 15 / month | Free, MIT licensed |
 | Word limits | 2,000 words / week on the free desktop plan | None |
 | Processing | Cloud only, audio leaves your device | Local first, fully offline mode |
-| Privacy | Vendor servers, vendor policies | Nothing leaves the machine by default |
+| Privacy | Vendor servers, vendor policies | Desktop inference uses local weights; browser speech and paired Android have different data paths |
 | Platforms | Mac, Windows, iPhone, Android | Desktop (Mac, Windows, Linux) plus web demo and API |
 | Languages | 100+ (cloud) | 99 with Whisper locally, 25 fast-track with Parakeet |
 | Smart cleanup | Yes | Yes, rule pipeline plus optional local LLM |

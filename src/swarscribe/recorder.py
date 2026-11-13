@@ -39,7 +39,7 @@ class AudioBuffer:
     def wav_bytes(self, trim: bool = True) -> bytes:
         samples = self.samples()
         if trim:
-            samples = trim_silence(samples)
+            samples = trim_silence(samples, rate=self.rate)
         buf = io.BytesIO()
         with wave.open(buf, "wb") as w:
             w.setnchannels(1)
@@ -49,16 +49,21 @@ class AudioBuffer:
         return buf.getvalue()
 
     def silent(self) -> bool:
-        return is_silence(self.samples())
+        return is_silence(self.samples(), rate=self.rate)
 
 
 class Recorder:
     """Push-to-talk recorder. start(), speak, stop() returns the buffer."""
 
-    def __init__(self, rate: int = SAMPLE_RATE):
+    def __init__(self, rate: int = SAMPLE_RATE, device=None,
+                 max_seconds: int = 180):
         self.rate = rate
+        self.device = device
+        self.max_seconds = max_seconds
         self.buffer = AudioBuffer(rate)
         self._stream = None
+        self.full = False
+        self.overrun = False
 
     def start(self) -> None:
         try:
@@ -67,19 +72,42 @@ class Recorder:
             raise RuntimeError(
                 "Recording needs the desktop extra: "
                 "pip install 'swarscribe[desktop]'") from exc
-        self.buffer = AudioBuffer(self.rate)
+        if self._stream is not None:
+            raise RuntimeError("Microphone is already recording.")
+        rate = self.rate
+        try:
+            sd.check_input_settings(device=self.device, samplerate=rate,
+                                    channels=1, dtype="int16")
+        except sd.PortAudioError:
+            rate = int(sd.query_devices(self.device, "input")["default_samplerate"])
+        self.buffer = AudioBuffer(rate)
+        self.full = self.overrun = False
+        remaining = rate * self.max_seconds * 2
 
         def _callback(indata, frames, time_info, status):  # pragma: no cover
-            self.buffer.add(bytes(indata))
+            nonlocal remaining
+            if status:
+                self.overrun = True
+            if remaining:
+                data = bytes(indata)[:remaining]
+                self.buffer.add(data)
+                remaining -= len(data)
+            self.full = remaining == 0
 
-        self._stream = sd.RawInputStream(
-            samplerate=self.rate, channels=1, dtype="int16",
-            callback=_callback)
-        self._stream.start()
+        stream = sd.RawInputStream(samplerate=rate, device=self.device,
+                                   channels=1, dtype="int16", callback=_callback)
+        try:
+            stream.start()
+        except BaseException:
+            stream.close()
+            raise
+        self._stream = stream
 
     def stop(self) -> AudioBuffer:
         if self._stream is not None:
-            self._stream.stop()
-            self._stream.close()
-            self._stream = None
+            stream, self._stream = self._stream, None
+            try:
+                stream.stop()
+            finally:
+                stream.close()
         return self.buffer

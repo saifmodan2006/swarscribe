@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Require a real speech engine for audio and provide setup errors. Add CPU/GPU selection, cached-only Whisper, bounded partial/final events and real audio timestamps.
+- Replace the Windows key-release loop with a single hotkey worker. Check editor focus, support toggle recording and preview selection commands.
+- Serve the dashboard and data from one loopback origin. Share dictionary, snippets, settings and transcript history across Python surfaces.
+- Isolate Android pairing behind authenticated HTTPS. Require the Android on-device recognizer for offline keyboard input.
+- Fix browser speech disclosures, SwarScribe branding, spoken times/dates/amounts and demo controls.
+- Add API, Windows state, Android and web regression tests and build checks. The project remains alpha.
+
 ## v0.6.0, 2026-11-13
 
 ### Everywhere release

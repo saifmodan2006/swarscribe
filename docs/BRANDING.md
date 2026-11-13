@@ -12,7 +12,7 @@ Pronunciation: *swar-scribe*. Short form: **Swar**.
 
 **Say it. It is written.**
 
-Supporting line, used wherever the product is explained: *Speak naturally. Get finished text. Nothing leaves your device.*
+Supporting line: *Speak naturally. Get finished text.* Describe privacy separately for desktop, Android, browser speech and hosted bots.
 
 ## The logo
 

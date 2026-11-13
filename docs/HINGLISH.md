@@ -1,30 +1,11 @@
-# Hinglish Mode
+# Hindi and mixed Hindi–English dictation
 
-India does not dictate in one language. It says "kal subah meeting
-hai, please send the file before that" in one breath, and generic
-dictation tools mangle the Hindi half or "correct" it into English.
+Set the desktop language to **Hindi** to give Whisper a Hindi hint. Set **Hindi + English** to select Whisper with automatic language detection. This uses transcription mode, so SwarScribe does not translate your words. Mixed speech can still come back in Devanagari, Latin script, or both depending on the model and sample.
 
-SwarScribe's Hinglish mode is built for the mix:
-
-- **Transcription** routes to Whisper with the Hindi language hint, so
-  mixed speech is heard as mixed speech, not forced into one language.
-- **Cleanup keeps the mix.** Hindi words are never translated or
-  anglicized. Only clear sentence-initial discourse fillers (a leading
-  "matlab", "arre") are removed, and only where they carry no meaning;
-  the same words mid-sentence are left untouched.
-- **Spelling is normalized** for the variants Whisper hears
-  inconsistently (bahot and bohot both land as bahut), with
-  capitalization preserved.
-- **Word packs** ship for everyday Hinglish (`packs/hinglish-everyday.json`),
-  and your own names and places are one `swarscribe dict add` away.
-
-Try it:
-
-```bash
+```powershell
+swarscribe transcribe .\speech.wav --engine whisper --model base --language hinglish
 swarscribe clean --hinglish "matlab kal subah meeting hai aur bahot kaam hai"
-# Kal subah meeting hai aur bahut kaam hai.
+swarscribe dict add "Super Base" Supabase
 ```
 
-Hinglish mode is young and honest about it: it handles the common
-patterns today, and the phrasebook approach means every correction
-users teach it makes the next dictation better.
+The optional text-only Hinglish cleanup normalizes a small set of Romanized variants and sentence-initial fillers. The default cleanup preserves mixed scripts and uses your dictionary to correct named terms. Android desktop mode offers the same Whisper auto routing; on-device mode uses the installed English or Hindi service. Neither engine guarantees word-by-word language switching.

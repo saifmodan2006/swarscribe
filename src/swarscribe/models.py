@@ -27,11 +27,12 @@ MODELS = [
               "Good default for short dictation on CPU."),
     ModelInfo("small", "whisper", 465, "99 languages",
               "Noticeably better with accents and names."),
+    ModelInfo("medium", "whisper", 1530, "99 languages", "Larger multilingual model."),
+    ModelInfo("large-v3", "whisper", 3100, "99 languages", "Larger multilingual model."),
     ModelInfo("large-v3-turbo", "whisper", 1620, "99 languages",
               "Best Whisper quality per second. Wants a GPU or patience."),
     ModelInfo("parakeet-tdt-0.6b-v3", "parakeet", 2440, "25 European languages",
-              "NVIDIA Parakeet. Fewer English errors than Whisper large, "
-              "about 13x faster. English dictation champion."),
+              "Optional NVIDIA NeMo backend. Hindi is not supported."),
 ]
 
 _BY_NAME = {m.name: m for m in MODELS}
@@ -53,13 +54,13 @@ def get(name: str) -> ModelInfo:
 def is_downloaded(name: str) -> bool:
     root = cache_dir()
     folder = root / name
-    if folder.is_dir() and any(folder.iterdir()):
+    if (folder / "model.bin").is_file() and (folder / "config.json").is_file():
         return True
     # faster-whisper caches under Hugging Face style folder names,
     # for example models--Systran--faster-whisper-tiny.
     if root.is_dir():
-        return any(entry.is_dir() and name in entry.name
-                   for entry in root.iterdir())
+        return any(candidate.is_file() and (candidate.parent / "config.json").is_file()
+                   for candidate in root.glob(f"models--*--faster-whisper-{name}/snapshots/*/model.bin"))
     return False
 
 

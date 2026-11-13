@@ -100,6 +100,11 @@ def _apply_self_corrections(text: str) -> str:
     for a phrase of the same length. Otherwise a single word is
     swapped for a single word.
     """
+    # Leave ordinary prose (and its paragraphs and commas) intact.
+    if not re.search(r"\b(?:no[ ,]+(?:wait|sorry)|wait[ ,]+no)\b", text, re.I):
+        return text
+    if "\n" in text:
+        return "\n".join(_apply_self_corrections(line) for line in text.split("\n"))
     tokens = text.replace(",", " , ").split()
     changed = True
     while changed:
@@ -146,16 +151,8 @@ def _apply_spoken_punctuation(text: str) -> str:
 
 
 def _capitalise_sentences(text: str) -> str:
-    parts = re.split(r"(?<=[.!?])\s+", text)
-    out = []
-    for part in parts:
-        part = part.strip()
-        if part:
-            part = part[0].upper() + part[1:]
-        out.append(part)
-    text = " ".join(out)
-    # Capitalise the start of each paragraph too.
-    text = re.sub(r"\n(\w)", lambda m: "\n" + m.group(1).upper(), text)
+    text = re.sub(r"(^\s*|[.!?]\s+|\n[ \t]*)(\w)",
+                  lambda match: match[1] + match[2].upper(), text)
     # Standalone "i" -> "I"
     text = re.sub(r"\bi\b", "I", text)
     return text

@@ -1,149 +1,170 @@
 package com.swarscribe.app
 
 import android.Manifest
-import android.media.AudioFormat
-import android.media.AudioRecord
-import android.media.MediaRecorder
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Spinner
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import java.io.ByteArrayOutputStream
+import androidx.core.content.ContextCompat
 import kotlin.concurrent.thread
 
-/**
- * The companion app: dictate here to try it, set your desktop's
- * server address for full-quality mode, and jump to the settings
- * screen that enables the SwarScribe keyboard.
- */
 class MainActivity : AppCompatActivity() {
+    private lateinit var engine: SpeechEngine
+    private lateinit var status: TextView
+    private lateinit var output: TextView
+    private lateinit var local: Button
+    private lateinit var desktop: Button
+    private lateinit var diagnostics: Button
+    private lateinit var language: Spinner
+    private var capture: MicCapture? = null
+    private var activeCapture: MicCapture? = null
+    private var operation = 0
+    private var busy = false
+    private var pendingPermission: (() -> Unit)? = null
 
-    private var engine: SpeechEngine? = null
-    private var recording = false
-    private var audioThread: Thread? = null
-    private val pcm = ByteArrayOutputStream()
+    private val permission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        val next = pendingPermission
+        pendingPermission = null
+        if (granted) next?.invoke() else status.text = "Microphone denied. Allow access in Android app settings."
+    }
+
+    private fun withMic(block: () -> Unit) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)
+            block()
+        else {
+            pendingPermission = block
+            permission.launch(Manifest.permission.RECORD_AUDIO)
+        }
+    }
+
+    private fun update(message: String) {
+        status.text = message
+        local.text = if (engine.state == SpeechEngine.State.LISTENING) "Stop on-device recording" else "Dictate on device"
+        desktop.text = if (capture != null) "Stop and send to desktop" else "Dictate via paired desktop"
+        local.isEnabled = !busy && engine.state != SpeechEngine.State.PROCESSING
+        desktop.isEnabled = capture != null || (!busy && engine.state == SpeechEngine.State.IDLE)
+        diagnostics.isEnabled = !busy && engine.state == SpeechEngine.State.IDLE
+        language.isEnabled = !busy && engine.state == SpeechEngine.State.IDLE
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        val output = findViewById<TextView>(R.id.outputText)
-        val status = findViewById<TextView>(R.id.statusText)
-        val serverUrl = findViewById<EditText>(R.id.serverUrl)
-
-        ActivityCompat.requestPermissions(
-            this, arrayOf(Manifest.permission.RECORD_AUDIO), 1
-        )
-
-        engine = SpeechEngine(
-            this,
-            onResult = { cleaned ->
-                runOnUiThread {
-                    output.text = cleaned
-                    status.setText(R.string.kb_ready)
+        output = findViewById(R.id.outputText)
+        status = findViewById(R.id.statusText)
+        local = findViewById(R.id.dictateButton)
+        desktop = findViewById(R.id.serverButton)
+        diagnostics = findViewById(R.id.checkConnection)
+        language = findViewById(R.id.language)
+        val url = findViewById<EditText>(R.id.serverUrl)
+        val token = findViewById<EditText>(R.id.pairToken)
+        val preferences = getSharedPreferences("dictation", MODE_PRIVATE)
+        url.setText(preferences.getString("desktop", ""))
+        language.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item,
+            listOf("English", "Hindi", "Hindi + English (desktop auto)"))
+        language.setSelection(preferences.getInt("language", 0).coerceIn(0, 2))
+        engine = SpeechEngine(this, { output.text = it; update("On-device transcript ready.") },
+            { update(it) }, { update("Recognizing on this device…") })
+        local.setOnClickListener {
+            if (engine.state == SpeechEngine.State.LISTENING) engine.stop()
+            else withMic {
+                if (language.selectedItemPosition == 2) {
+                    update("Choose English or Hindi for Android on-device speech, or use desktop auto detection.")
+                } else {
+                    preferences.edit().putInt("language", language.selectedItemPosition).apply()
+                    engine.start(if (language.selectedItemPosition == 1) "hi-IN" else "en-IN")
+                    if (engine.state == SpeechEngine.State.LISTENING) update("Listening on this device…")
                 }
-            },
-            onError = { message ->
-                runOnUiThread { status.text = message }
             }
-        )
-
-        findViewById<Button>(R.id.dictateButton).setOnClickListener {
-            status.setText(R.string.kb_listening)
-            engine?.start()
         }
 
-        findViewById<Button>(R.id.serverButton).setOnClickListener {
-            if (!recording) startServerRecording(status)
-            else stopServerRecording(serverUrl.text.toString(), output, status)
+        fun paired(recordAudio: Boolean) {
+            val host = url.text.toString().trim()
+            val key = token.text.toString().trim()
+            try {
+                ServerClient.address(host)
+                require(Regex("[A-Za-z0-9_-]{32,128}").matches(key)) { "Paste the desktop pairing token." }
+            } catch (e: IllegalArgumentException) {
+                update(e.message ?: "Invalid desktop pairing settings.")
+                return
+            }
+            val languageIndex = language.selectedItemPosition
+            val selected = listOf("en", "hi", "hinglish")[languageIndex]
+            preferences.edit().putString("desktop", host).putInt("language", languageIndex).apply()
+            val session = if (recordAudio) MicCapture() else null
+            capture = session
+            activeCapture = session
+            busy = true
+            val id = ++operation
+            update(if (recordAudio) "Recording locally. Stop to send to the paired desktop." else "Checking HTTPS pairing…")
+            thread(name = "SwarScribe desktop connection") {
+                val result = runCatching {
+                    if (session == null) {
+                        ServerClient.check(host, key)
+                        null
+                    } else {
+                        val wav = session.capture() ?: return@thread
+                        if (session.isCancelled) return@thread
+                        runOnUiThread {
+                            if (id == operation) { capture = null; update("Sending audio to the paired desktop…") }
+                        }
+                        ServerClient.transcribe(host, key, wav, selected)
+                    }
+                }
+                runOnUiThread {
+                    if (id != operation) return@runOnUiThread
+                    capture = null
+                    activeCapture = null
+                    busy = false
+                    result.fold(onSuccess = {
+                        if (it != null) output.text = it
+                        update(if (it != null) "Desktop transcript ready." else "HTTPS and pairing token verified.")
+                    }, onFailure = { update(it.message ?: "Desktop operation failed.") })
+                }
+            }
         }
 
+        diagnostics.setOnClickListener { paired(false) }
+        desktop.setOnClickListener {
+            val session = capture
+            if (session != null) {
+                capture = null
+                session.stop()
+                update("Stopping microphone…")
+            } else if (!busy) withMic { paired(true) }
+        }
         findViewById<Button>(R.id.keyboardSettingsButton).setOnClickListener {
-            startActivity(
-                android.content.Intent(
-                    android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS
-                )
-            )
+            startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
         }
-
         findViewById<Button>(R.id.bubbleButton).setOnClickListener {
-            toggleBubble()
-        }
-
-        if (intent.getBooleanExtra(EXTRA_FROM_BUBBLE, false)) {
-            status.setText(R.string.kb_listening)
-            engine?.start()
-        }
-    }
-
-    private fun toggleBubble() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M
-            && !android.provider.Settings.canDrawOverlays(this)
-        ) {
-            startActivity(
-                android.content.Intent(
-                    android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    android.net.Uri.parse("package:$packageName")
-                )
-            )
-            return
-        }
-        startService(android.content.Intent(this, BubbleService::class.java))
-    }
-
-    companion object {
-        const val EXTRA_FROM_BUBBLE = "from_bubble"
-    }
-
-    private fun startServerRecording(status: TextView) {
-        recording = true
-        pcm.reset()
-        status.setText(R.string.server_recording)
-        audioThread = thread {
-            val bufferSize = AudioRecord.getMinBufferSize(
-                16000, AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT
-            )
-            val record = AudioRecord(
-                MediaRecorder.AudioSource.MIC, 16000,
-                AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT, bufferSize
-            )
-            val buffer = ByteArray(bufferSize)
-            record.startRecording()
-            while (recording) {
-                val read = record.read(buffer, 0, buffer.size)
-                if (read > 0) pcm.write(buffer, 0, read)
+            if (!Settings.canDrawOverlays(this)) {
+                startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
+            } else {
+                startService(Intent(this, BubbleService::class.java))
+                update("Floating shortcut enabled. Tap it to open SwarScribe; hold it to dismiss.")
             }
-            record.stop()
-            record.release()
         }
+        if (intent.getBooleanExtra(EXTRA_FROM_BUBBLE, false)) update("Choose a dictation mode to begin.")
     }
 
-    private fun stopServerRecording(
-        url: String, output: TextView, status: TextView
-    ) {
-        recording = false
-        audioThread?.join(500)
-        status.setText(R.string.server_sending)
-        ServerClient.transcribe(
-            url, ServerClient.wavBytes(pcm),
-            onDone = { clean ->
-                runOnUiThread {
-                    output.text = clean
-                    status.setText(R.string.kb_ready)
-                }
-            },
-            onError = { message ->
-                runOnUiThread { status.text = message }
-            }
-        )
+    override fun onStop() {
+        super.onStop()
+        ++operation
+        activeCapture?.cancel()
+        capture = null
+        activeCapture = null
+        busy = false
+        engine.cancel()
+        update("Ready. Any active recording was cancelled.")
     }
 
-    override fun onDestroy() {
-        engine?.destroy()
-        super.onDestroy()
-    }
+    companion object { const val EXTRA_FROM_BUBBLE = "from_bubble" }
 }

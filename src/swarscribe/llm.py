@@ -20,6 +20,42 @@ SYSTEM_PROMPT = (
     "Return only the rewritten text."
 )
 
+COMMAND_PROMPTS = {
+    "fix grammar": "Correct grammar and punctuation while preserving the meaning and language.",
+    "rewrite professionally": "Rewrite in a professional tone without changing meaning or adding facts.",
+}
+
+
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+def rewrite_locally(text: str, command: str, model: str) -> str:
+    """Opt-in selected-text rewriting through Ollama on loopback, with no fallback."""
+    payload = json.dumps({
+        "model": model, "stream": False,
+        "options": {"num_predict": 2048},
+        "messages": [
+            {"role": "system", "content": COMMAND_PROMPTS[command] + " Return only the revised text."},
+            {"role": "user", "content": text},
+        ],
+    }).encode()
+    request = urllib.request.Request("http://127.0.0.1:11434/api/chat", data=payload,
+                                     headers={"Content-Type": "application/json"})
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
+    try:
+        with opener.open(request, timeout=60) as response:
+            data = json.loads(response.read(131072))
+        if data.get("done_reason") == "length":
+            raise ValueError("Truncated rewrite.")
+        rewritten = data["message"]["content"].strip()
+        if not rewritten or len(rewritten) > 16000:
+            raise ValueError("Empty or oversized rewrite.")
+        return rewritten
+    except (OSError, ValueError, KeyError, TypeError, AttributeError) as exc:
+        raise RuntimeError("Ollama did not return a usable rewrite. Check the running local service and model.") from exc
+
 
 class OllamaEnhancer:
     def __init__(self, model: str = "llama3.1:8b",

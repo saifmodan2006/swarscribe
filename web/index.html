@@ -3,8 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SwarScribe - Offline-First AI Dictation</title>
-<meta name="description" content="Speak naturally, get finished text. Offline-first AI dictation with smart cleanup, command mode, code mode and meeting notes. Free and open source.">
+<title>SwarScribe · Dictation Demo</title>
+<meta name="description" content="Try SwarScribe’s local text cleanup. Optional speech recognition uses your browser’s speech service.">
+<meta property="og:title" content="SwarScribe · Dictation Demo">
+<meta property="og:description" content="Try local text formatting with an optional browser microphone.">
+<meta property="og:image" content="https://saifmodan2006.github.io/swarscribe/assets/social-preview.svg">
 <link rel="icon" href="../assets/logo.svg" type="image/svg+xml">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="style.css">
@@ -12,11 +15,10 @@
 <body>
 <header class="hero">
   <img class="logo" src="../assets/logo.svg" alt="SwarScribe logo">
-  <h1>Flow<span>Scribe</span></h1>
-  <p class="tag">Speak naturally. Get finished text.<br>Nothing leaves your device.</p>
-  <p class="badges"><span>Offline first</span><span>Dual engine</span><span>Command Mode</span><span>Code Mode</span><span>Meeting Notes</span><span>No word caps</span><span>MIT</span></p>
-  <p class="cta"><a class="btn primary" href="https://github.com/saifmodan2006/swarscribe">Star on GitHub</a> <a class="btn" href="#try">Try the live demo</a></p>
-  <p class="proof">The cleanup below runs in your browser. No server, no upload, no account. That is the whole point.</p>
+  <h1>Swar<span>Scribe</span></h1>
+  <p class="tag">Speak naturally. Get finished text.</p>
+  <p class="cta"><a class="btn primary" href="#try">Try the demo</a> <a class="btn" href="https://github.com/saifmodan2006/swarscribe#quick-start">Install SwarScribe</a></p>
+  <p class="proof">Text cleanup runs in this page. The optional browser mic may send audio to a speech provider. For offline speech recognition, use a downloaded desktop model or a supported Android on-device service.</p>
 </header>
 
 <main>
@@ -29,9 +31,10 @@
       <button class="chip" data-example="first apples second bananas third oranges">Spoken list</button>
       <button class="chip" data-example="hi team comma i can't ship today period the build is really very broken">Email style</button>
     </p>
-    <textarea id="input" rows="4" placeholder="Speak with the mic button, or paste raw dictation here..."></textarea>
+    <textarea id="input" rows="4" aria-label="Raw transcript" placeholder="Speak with the mic button, or paste raw dictation here..."></textarea>
     <div class="row">
-      <button id="mic">Start mic</button>
+      <button id="mic" aria-describedby="mic-privacy">Start browser mic</button>
+      <label>Mic language <select id="language"><option value="en-IN">English</option><option value="hi-IN">Hindi</option></select></label>
       <button id="clean" class="primary">Clean it up</button>
       <label>Style
         <select id="style">
@@ -43,11 +46,13 @@
       </label>
       <label><input type="checkbox" id="code"> Code mode</label>
     </div>
+    <p class="hint" id="mic-privacy">Browser speech may use an online service. Paste or type text to skip microphone access.</p>
     <h3>Clean output</h3>
-    <textarea id="output" rows="4" readonly placeholder="Clean text appears here..."></textarea>
+    <textarea id="output" rows="4" readonly aria-label="Clean output" placeholder="Clean text appears here..."></textarea>
     <div class="row">
       <button id="copy">Copy output</button>
-      <span id="stats"></span>
+      <button id="clear">Clear text</button>
+      <span id="status" role="status" aria-live="polite">Enter text or try the browser mic.</span>
     </div>
     <div class="row commands">
       <span class="hint">Command Mode:</span>
@@ -61,30 +66,18 @@
   <section class="stats-band">
     <div><strong id="stat-words">0</strong><span>words cleaned in this demo session</span></div>
     <div><strong id="stat-edits">0</strong><span>edits SwarScribe made for you</span></div>
-    <div><strong>0</strong><span>bytes uploaded. Ever.</span></div>
+    <div><strong>Local</strong><span>text formatting in this page</span></div>
   </section>
 
   <section class="grid">
-    <div class="card"><h3>Dual engine</h3><p>Parakeet v3 for fast English dictation, Whisper large-v3-turbo for 99 languages including Hindi and Hinglish. Picked automatically by language.</p></div>
+    <div class="card"><h3>Desktop speech</h3><p>Download a Whisper model for local inference on your computer. Parakeet is optional on supported NeMo setups.</p></div>
     <div class="card"><h3>Smart formats</h3><p>Emails, websites, times, dates and amounts land written, not spelled out. "Five thirty pm" becomes 5:30 PM.</p></div>
-    <div class="card"><h3>It learns your words</h3><p>Correct a name once and SwarScribe learns it into your personal dictionary. Your file, your words.</p></div>
+    <div class="card"><h3>Personal dictionary</h3><p>On desktop, add custom words and snippets in the local dashboard.</p></div>
     <div class="card"><h3>Code Mode</h3><p>"Snake case user name equals five" becomes <code>user_name = 5</code>. Dictate code without fighting the engine.</p></div>
-    <div class="card"><h3>Meeting Mode</h3><p>A whole meeting becomes summary, decisions and action items. No bot joins your call.</p></div>
-    <div class="card"><h3>Private by design</h3><p>No account, no upload, no training on your voice. Wispr Flow is cloud only and caps its free plan. SwarScribe is neither.</p></div>
+    <div class="card"><h3>Meeting notes</h3><p>The CLI can turn a recorded WAV into timestamped text and extractive notes.</p></div>
+    <div class="card"><h3>Android keyboard</h3><p>Dictate on Android 12+ when a compatible offline speech service and language are installed. <a href="https://github.com/saifmodan2006/swarscribe/tree/main/android">Android setup and APK instructions</a>.</p></div>
   </section>
 
-  <section class="card compare">
-    <h2>SwarScribe vs Wispr Flow, in one glance</h2>
-    <table>
-      <tr><th></th><th>Wispr Flow</th><th>SwarScribe</th></tr>
-      <tr><td>Processing</td><td>Cloud only</td><td>On your device</td></tr>
-      <tr><td>Free plan</td><td>2,000 words / week</td><td>Unlimited</td></tr>
-      <tr><td>Command Mode</td><td>Paid plan</td><td>Built in</td></tr>
-      <tr><td>Code dictation</td><td>Basic</td><td>Dedicated Code Mode</td></tr>
-      <tr><td>Linux</td><td>No</td><td>Yes</td></tr>
-      <tr><td>Source</td><td>Closed</td><td>Open, MIT</td></tr>
-    </table>
-  </section>
 </main>
 
 <footer><p>SwarScribe by <a href="https://www.devbysaif.in/">Saif Modan</a> - MIT licensed - <a href="https://github.com/saifmodan2006/swarscribe">GitHub</a></p></footer>

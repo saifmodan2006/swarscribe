@@ -1,86 +1,18 @@
-# SwarScribe Architecture
+# SwarScribe architecture
 
-## Design principles
+The Windows tray, Python CLI and local API share the speech backend and rule pipeline. Android and the web demo have smaller client-side cleanup implementations.
 
-1. **Local first.** Transcription, cleanup, dictionary, snippets and
-   analytics run on the user's machine. The cloud is an opt-in, never
-   a requirement.
-2. **No single model bet.** Two open source engines cover speed and
-   language coverage; the pipeline picks per session.
-3. **Deterministic core, optional AI.** The rule cleanup pipeline
-   always works, offline, in milliseconds. An LLM pass (local Ollama
-   or a user-configured endpoint) is an enhancement, never a dependency.
-4. **Plain files the user owns.** Config, dictionary, snippets and
-   history are JSON on disk. No account, no lock-in.
+| Surface | Audio path | Output |
+|---|---|---|
+| Windows hotkey / tray | PortAudio capture, one recording at a time, then cached speech model | Guarded Windows Unicode input or previewed selection command; optional history |
+| Terminal and API | File, microphone, or bounded WAV payload → cached speech model | Terminal, JSON, optional local history |
+| Meeting CLI | Mono PCM16 WAV on disk → bounded chunks and speech model | Local Markdown with model or chunk timestamps |
+| Android keyboard and on-device companion | Android on-device speech service | InputConnection or companion preview |
+| Android paired companion | Bounded PCM16 WAV → explicit HTTPS pairing endpoint → desktop model | Companion preview |
+| Web demo | Typed/pasted text or optional browser speech service | Page preview and explicit copy |
 
-## Pipeline
+`transcribe.py` defines the audio backend contract, bounded process-local cache and timestamps. Explicit engine requests fail rather than switching engines; auto may fall back at initialization. `streaming.py` emits partial previews and stable finals with source offsets for file replay. It does not use a native incremental model.
 
-```
-microphone / audio file / pasted text
-        |
-        v
-[ Transcription ]  Parakeet v3 (speed, English + 25 European)
-                   or Whisper large-v3-turbo via faster-whisper
-                   (99 languages, Hindi and Hinglish included)
-        |
-        v
-[ Cleanup ]        fillers, repetitions, self-corrections,
-                   spoken punctuation, spoken lists
-        |
-        v
-[ Dictionary ]     personal terms and mis-hearing fixes
-        |
-        v
-[ Snippets ]       spoken triggers -> saved text blocks
-        |
-        v
-[ Code mode ]      optional: identifiers, symbols, digits
-        |
-        v
-[ Style ]          per-app tone: email, chat, formal, document
-        |
-        v
-[ LLM pass ]       optional, local Ollama or user endpoint
-        |
-        v
-[ Output ]         typed at cursor (desktop), clipboard, API, file
-        |
-        v
-[ Analytics ]      words, WPM, estimated time saved (local only)
-```
+`pipeline.py` applies smart cleanup, personal dictionary, snippets, Code Mode or style. `app.py` and `config.py` share preferences and data between entry points. Local JSON files are replaced atomically; writes within an API process are serialized. Separate processes writing at the same time can still lose updates. `windows.py` checks the foreground editor and avoids clipboard mutation. Selected-text commands recheck the selection after preview.
 
-## Modules
-
-| Module | Job |
-| --- | --- |
-| `transcribe.py` | Dual-engine backends, lazy loading, graceful fallback |
-| `cleanup.py` | The smart cleanup rule pipeline |
-| `dictionary.py` | Personal dictionary with suggestions |
-| `snippets.py` | Spoken trigger expansion |
-| `styles.py` | Per-app writing styles |
-| `commands.py` | Command Mode voice editing |
-| `codemode.py` | Developer dictation: identifiers and symbols |
-| `meeting.py` | Meeting Mode: summary, decisions, action items |
-| `analytics.py` | Local dictation statistics |
-| `llm.py` | Optional Ollama / OpenAI-compatible enhancement |
-| `pipeline.py` | Orchestrates every stage |
-| `desktop.py` | Push-to-talk hotkey and paste at cursor |
-| `api.py` | FastAPI service wrapper |
-| `cli.py` | Command line interface |
-| `config.py` | Local JSON configuration |
-
-## Why two engines
-
-Parakeet TDT 0.6B v3 beats Whisper large-v3 on English word error
-rate and runs many times faster, which is what live dictation feels
-like. Whisper covers 99 languages, which Parakeet does not, and it
-is the practical choice for Hindi and mixed Hindi-English speech.
-SwarScribe routes by language instead of forcing one trade-off.
-
-## Privacy model
-
-- Audio never leaves the device in local mode.
-- Transcripts, history and analytics stay in local files.
-- The optional LLM pass prefers a local Ollama server.
-- There is no telemetry. The analytics module counts words for the
-  user, on the user's disk, for the user's own report.
+`api.py` serves packaged dashboard assets and JSON from the same loopback origin. Its separate paired mode exposes only the authenticated speech and health routes. Read [security and privacy](../SECURITY.md) for the network boundaries and data retention.

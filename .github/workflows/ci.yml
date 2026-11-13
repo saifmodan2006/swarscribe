@@ -1,27 +1,80 @@
 name: CI
-
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  python:
     strategy:
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        include:
+          - {os: ubuntu-latest, python: "3.10"}
+          - {os: ubuntu-latest, python: "3.12"}
+          - {os: windows-latest, python: "3.12"}
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install
-        run: pip install -e .
-      - name: Run tests
-        run: PYTHONPATH=src python -m unittest discover -s tests -v
-      - name: Run demo
-        run: python examples/demo.py
-      - name: Run benchmark (smoke)
-        run: python benchmarks/benchmark.py
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install -e ".[api,dev]"
+      - run: python -m pip check
+      - run: python -m ruff check src tests benchmarks/verify_speech.py --select E9,F63,F7,F82
+      - run: python -m pytest -q
+      - run: python examples/demo.py
+      - run: python benchmarks/benchmark.py
+      - run: python -m build
+      - name: Verify dashboard assets ship in the wheel
+        run: python -c "import glob,zipfile; z=zipfile.ZipFile(glob.glob('dist/*.whl')[0]); assert all('swarscribe/dashboard/'+p in z.namelist() for p in ('index.html','dashboard.js','dashboard.css'))"
+
+  speech:
+    runs-on: ubuntu-latest
+    env:
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      SWARSCRIBE_HOME: ${{ runner.temp }}/swarscribe
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e ".[whisper,api,dev]"
+      - run: python -m pip check
+      - run: swarscribe model-download --engine whisper --model tiny
+      - run: curl --fail --location --output sample.wav https://raw.githubusercontent.com/ggml-org/whisper.cpp/b0a11594aec50892a02cd8d129eee2dfe93a8bb8/samples/jfk.wav
+      - run: echo "59dfb9a4acb36fe2a2affc14bacbee2920ff435cb13cc314a08c13f66ba7860e  sample.wav" | sha256sum -c
+      - name: Verify real local speech inference, API cleanup and history
+        env:
+          HF_HUB_OFFLINE: "1"
+        run: python benchmarks/verify_speech.py sample.wav
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test web/format.test.cjs
+      - run: node --check src/swarscribe/dashboard/dashboard.js
+
+  windows-package:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e . pyinstaller
+      - run: python -m PyInstaller packaging/swarscribe.spec --noconfirm
+      - run: dist/swarscribe.exe clean "um hello world"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: swarscribe-windows-text-cli
+          path: dist/swarscribe.exe
+          if-no-files-found: error

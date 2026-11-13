@@ -1,7 +1,6 @@
 # PyInstaller spec: builds a single-file `swarscribe` executable.
 # Build:  pyinstaller packaging/swarscribe.spec
-# The binary bundles the cleanup/CLI core. Speech models stay external
-# (they are large); the app downloads them on first use as usual.
+# Standalone text CLI. Use the Python installation for speech and dashboard.
 import os
 
 ROOT = os.path.abspath(os.path.join(SPECPATH, ".."))
@@ -13,7 +12,8 @@ a = Analysis(
     datas=[(os.path.join(ROOT, "assets", "logo.png"), "assets")],
     hiddenimports=[],
     hookspath=[],
-    excludes=["nemo", "torch", "faster_whisper", "ctranslate2"],
+    excludes=["nemo", "torch", "faster_whisper", "ctranslate2", "av", "onnxruntime",
+              "numpy", "fastapi", "uvicorn", "sounddevice", "pystray", "comtypes"],
     noarchive=False,
 )
 pyz = PYZ(a.pure)

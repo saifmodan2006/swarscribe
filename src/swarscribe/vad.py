@@ -55,5 +55,6 @@ def trim_silence(samples: array.array, **kwargs) -> array.array:
     return samples[start:end]
 
 
-def is_silence(samples: array.array, threshold: float = 300.0) -> bool:
-    return speech_bounds(samples, threshold=threshold) == (0, 0)
+def is_silence(samples: array.array, threshold: float = 300.0,
+               rate: int = SAMPLE_RATE) -> bool:
+    return speech_bounds(samples, threshold=threshold, rate=rate) == (0, 0)

@@ -13,12 +13,20 @@ import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
+from .storage import write_json
+
 
 @dataclass
 class Entry:
     raw: str
     text: str
     timestamp: float = field(default_factory=time.time)
+    id: str = ""
+
+    def __post_init__(self):
+        if not self.id:
+            import uuid
+            self.id = uuid.uuid5(uuid.NAMESPACE_OID, f"{self.timestamp}:{self.text}").hex
 
 
 class History:
@@ -39,6 +47,15 @@ class History:
     def last(self) -> Entry | None:
         return self.entries[-1] if self.entries else None
 
+    def prune(self, days: int) -> None:
+        cutoff = time.time() - days * 86400
+        self.entries[:] = [e for e in self.entries if e.timestamp >= cutoff]
+
+    def delete(self, entry_id: str) -> bool:
+        previous = len(self.entries)
+        self.entries[:] = [e for e in self.entries if e.id != entry_id]
+        return len(self.entries) != previous
+
     def export_markdown(self) -> str:
         lines = ["# SwarScribe Session", ""]
         for entry in self.entries:
@@ -48,12 +65,11 @@ class History:
         return "\n".join(lines) + "\n"
 
     def save(self, path: str | Path) -> None:
-        Path(path).write_text(json.dumps(
-            [asdict(e) for e in self.entries], indent=2))
+        write_json(path, [asdict(e) for e in self.entries])
 
     @classmethod
     def load(cls, path: str | Path) -> "History":
         history = cls()
-        for row in json.loads(Path(path).read_text()):
+        for row in json.loads(Path(path).read_text(encoding="utf-8-sig")):
             history.entries.append(Entry(**row))
         return history
