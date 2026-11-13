@@ -3,7 +3,7 @@
 Build from a clean Python environment. The executable runs text cleanup, rule commands, Code Mode and other text-only CLI tools. Use the full Python installation described in the [quick start](../README.md#quick-start) for microphone recording, inference, the tray, and the dashboard.
 
 ```powershell
-python -m pip install -e . pyinstaller
+python -m pip install -e . pyinstaller pillow
 python -m PyInstaller packaging/swarscribe.spec --noconfirm
 .\dist\swarscribe.exe clean "um hello world"
 ```

@@ -72,7 +72,7 @@ swarscribe history --export
 & $py -m ruff check src tests --select E9,F63,F7,F82
 node --test web/format.test.cjs
 & $py -m build
-& $py -m pip install pyinstaller
+& $py -m pip install pyinstaller pillow
 & $py -m PyInstaller packaging/swarscribe.spec --noconfirm
 .\dist\swarscribe.exe clean "um hello world"
 gradle -p android testDebugUnitTest lintDebug assembleDebug assembleRelease assembleDebugAndroidTest
