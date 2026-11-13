@@ -27,6 +27,7 @@ button:disabled { cursor:default; opacity:.58; }
 .nav { min-height:74px; display:flex; align-items:center; justify-content:space-between; gap:18px; }
 .brand { display:inline-flex; align-items:center; gap:10px; text-decoration:none; font-size:1.2rem; font-weight:750; letter-spacing:-.05em; }
 .nav-links,.nav-github { display:flex; align-items:center; gap:25px; }
+.nav-links { flex-wrap:wrap; }
 .nav-links a,.nav-github { font-size:.9rem; font-weight:650; text-decoration:none; }
 .nav-links a:hover,.nav-github:hover { color:var(--accent); }
 .nav-github { gap:6px; }
@@ -84,3 +85,18 @@ input[type=checkbox] { width:1rem; height:1rem; accent-color:var(--accent); }
 @media(max-width:850px) { .hero { gap:25px; } .feature-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .downloads { grid-template-columns:1fr 1fr; } .downloads > div { grid-column:1/-1; } }
 @media(max-width:620px) { .hero,.editors,.downloads,.feature-grid { grid-template-columns:1fr; } .hero-art { aspect-ratio:1.45; } .output-editor { border-left:0; border-top:1px solid var(--line); } .nav { flex-wrap:wrap; padding-block:12px; gap:8px 15px; } .nav-links { order:3; width:100%; gap:16px; } textarea { min-height:105px; } }
 @media(prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } }
+
+.studio-feedback { border-top:1px solid var(--line); padding:14px clamp(16px,2.5vw,26px); font-size:.9rem; }
+.studio-feedback summary { cursor:pointer; font-weight:650; width:fit-content; }
+.studio-feedback p { color:var(--muted); margin:8px 0; }
+.studio-feedback #example-status:empty { margin:0; }
+.studio-feedback textarea { border:1px solid var(--line); margin-top:8px; }
+.text-link,.community-grid a { color:var(--accent); font-weight:650; }
+.community { padding-top:clamp(48px,7vw,90px); }
+.community-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.community-grid article { display:flex; align-items:start; flex-direction:column; padding:clamp(16px,3vw,28px); background:var(--white); border:1px solid var(--line); border-radius:14px; }
+.community-grid p,.community-next p { margin:7px 0 14px; color:var(--muted); }
+.community-grid a { margin-top:auto; }
+.community-next { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; border-top:1px solid var(--line); margin-top:22px; padding-block:18px; }
+.community-next p { margin-bottom:0; }
+@media(max-width:720px) { .community-grid { grid-template-columns:1fr; } }

@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Contributor guide
+    url: https://github.com/saifmodan2006/swarscribe/blob/main/CONTRIBUTING.md
+    about: Find local setup, test commands, and ways to contribute.
+  - name: Private security reporting
+    url: https://github.com/saifmodan2006/swarscribe/blob/main/SECURITY.md
+    about: Follow the security policy for reports that involve sensitive data.

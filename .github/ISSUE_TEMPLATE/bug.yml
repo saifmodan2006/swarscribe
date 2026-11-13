@@ -1,0 +1,43 @@
+name: Report a bug
+description: Report incorrect output, a crash, or a problem using SwarScribe
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use a short example with made-up details. Review screenshots, transcripts, and logs for private content before posting.
+        For a security problem, use the [private reporting instructions](https://github.com/saifmodan2006/swarscribe/blob/main/SECURITY.md).
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Where did it happen?
+      options:
+        - Browser studio
+        - Windows tray or local workspace
+        - Android companion or keyboard
+        - CLI or API
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: setup
+    attributes:
+      label: Version and setup
+      description: Include the version or commit, OS or browser, and speech engine if relevant.
+      placeholder: "Example: Android 15, debug APK from the latest CI run, on-device English"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps and actual result
+      description: Paste a sanitized studio test case here if you used the Copy test case button.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+    validations:
+      required: true

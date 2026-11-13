@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Add a contribution section and a copyable formatting test case to the browser studio. Update contributor setup, roadmap, and GitHub feedback forms.
 - Redesign the web studio, desktop workspace, Android companion, and voice keyboard. Add a Windows status window and transcript copy controls.
 - Require a real speech engine for audio and provide setup errors. Add CPU/GPU selection, cached-only Whisper, bounded partial/final events and real audio timestamps.
 - Replace the Windows key-release loop with a single hotkey worker. Check editor focus, support toggle recording and preview selection commands.

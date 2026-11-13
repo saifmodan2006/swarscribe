@@ -1,6 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const {smartFormatsJS, formatTranscript} = require("./app.js");
+const {smartFormatsJS, formatTranscript, exampleReport} = require("./app.js");
 
 for (const [input, expected] of [
   ["Five forty PM", "5:40 PM"],
@@ -21,4 +21,18 @@ for (const [input, expected] of [
 test("spoken punctuation and code mode", () => {
   assert.equal(formatTranscript("hello comma how are you question mark"), "Hello, how are you?");
   assert.equal(formatTranscript("snake case user name equals five", {code:true}), "user_name = 5");
+});
+
+test("spoken list markers format a list without changing ordinary prose", () => {
+  assert.equal(formatTranscript("first apples comma second bananas comma third oranges."),
+    "- apples\n- bananas\n- oranges");
+  assert.equal(formatTranscript("the first draft needs a second look"),
+    "The first draft needs a second look.");
+});
+
+test("a copied test case preserves multiline text and the formatter settings", () => {
+  const input = 'first apples\nsecond bananas\nthird "blood oranges"';
+  const output = '- apples\n- bananas\n- "blood oranges"';
+  assert.deepEqual(JSON.parse(exampleReport(input, output, {code: false, style: ""})),
+    {input, output, mode: "dictation", style: "default"});
 });

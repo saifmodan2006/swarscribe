@@ -19,7 +19,7 @@
 <header class="site-header">
   <nav class="wrap nav" aria-label="Main navigation">
     <a class="brand" href="./"><img src="../assets/logo.svg" alt="" width="35" height="35">SwarScribe</a>
-    <div class="nav-links"><a href="#try">Studio</a><a href="#features">Features</a><a href="#download">Get the app</a></div>
+    <div class="nav-links"><a href="#try">Studio</a><a href="#features">Features</a><a href="#download">Get the app</a><a href="#contribute">Contribute</a></div>
     <a class="nav-github" href="https://github.com/saifmodan2006/swarscribe">GitHub <span aria-hidden="true">↗</span></a>
   </nav>
 </header>
@@ -49,6 +49,7 @@
         <button class="chip" data-example="my email is saif modan at gmail dot com and the launch is on fifteen november 2026">Format an email</button>
         <button class="chip" data-example="hi team comma i can't ship today period the build is really very broken">Polish a message</button>
         <button class="chip" data-example="snake case user name equals five" data-code="true">Dictate code</button>
+        <button class="chip" data-example="first apples second bananas third oranges">Format a list</button>
       </div>
     </div>
     <div class="editors">
@@ -85,6 +86,14 @@
       <p id="mic-privacy">Text cleanup runs in this page. Browser speech recognition may send audio to your speech provider.</p>
       <p class="counts"><strong id="stat-words">0</strong> words · <strong id="stat-edits">0</strong> edits this session</p>
     </div>
+    <details class="studio-feedback">
+      <summary>Report a formatting problem</summary>
+      <p>Use a short example with made-up details. Copy the input, settings, and formatter output, then paste them into a GitHub bug report and describe what you expected.</p>
+      <div class="row"><button id="copy-example" type="button">Copy test case</button>
+        <a class="text-link" href="https://github.com/saifmodan2006/swarscribe/issues/new?template=bug.yml">Open bug form <span aria-hidden="true">↗</span></a></div>
+      <p id="example-status" role="status"></p>
+      <textarea id="example-report" rows="6" readonly hidden aria-label="Test case to copy"></textarea>
+    </details>
   </section>
 
   <section class="features" id="features" aria-labelledby="features-title">
@@ -103,6 +112,22 @@
     <div><p class="kicker">Install SwarScribe</p><h2 id="download-title">Write where you work.</h2></div>
     <article><h3>Windows</h3><p>Use a global shortcut for dictation and manage your preferences in the local workspace.</p><a href="https://github.com/saifmodan2006/swarscribe/blob/main/docs/WINDOWS.md">Windows setup <span aria-hidden="true">↗</span></a></article>
     <article><h3>Android</h3><p>Use the on-device keyboard on supported Android 12+ phones, or pair the companion with your desktop.</p><a href="https://github.com/saifmodan2006/swarscribe/tree/main/android">Android setup <span aria-hidden="true">↗</span></a></article>
+  </section>
+
+  <section class="community" id="contribute" aria-labelledby="community-title">
+    <div class="section-head">
+      <div><p class="kicker">Open source</p><h2 id="community-title">Help shape SwarScribe.</h2></div>
+      <p class="muted">A clear example, a device test, or a small code change can make dictation better for the next person.</p>
+    </div>
+    <div class="community-grid">
+      <article><span class="feature-mark" aria-hidden="true">Aa</span><h3>Improve how text comes out</h3><p>Try a phrase in the studio. If the result is off, share a short example and what you expected.</p><a href="#try">Try the studio <span aria-hidden="true">↑</span></a></article>
+      <article><span class="feature-mark" aria-hidden="true">⌘</span><h3>Test on your device</h3><p>Try a Windows editor or the Android keyboard. Device details and steps help maintainers reproduce problems.</p><a href="https://github.com/saifmodan2006/swarscribe/issues/new/choose">Choose a feedback form <span aria-hidden="true">↗</span></a></article>
+      <article><span class="feature-mark" aria-hidden="true">&lt;/&gt;</span><h3>Build your first change</h3><p>Run the text tests, find the relevant files, and pick a small task in web, docs, or speech cleanup.</p><a href="https://github.com/saifmodan2006/swarscribe/blob/main/CONTRIBUTING.md">Read the contributor guide <span aria-hidden="true">↗</span></a></article>
+    </div>
+    <div class="community-next">
+      <div><h3>See what needs help</h3><p>Current priorities include editor compatibility, Android device tests, and multilingual examples.</p></div>
+      <div class="row"><a class="button" href="https://github.com/saifmodan2006/swarscribe/blob/main/docs/ROADMAP.md">View roadmap</a><a class="button" href="https://github.com/saifmodan2006/swarscribe/issues/new?template=idea.yml">Suggest an idea <span aria-hidden="true">↗</span></a></div>
+    </div>
   </section>
 </main>
 <footer class="wrap footer"><a class="brand" href="./"><img src="../assets/logo.svg" alt="" width="30" height="30">SwarScribe</a><p>MIT licensed · Made by <a href="https://www.devbysaif.in/">Saif Modan</a></p><a href="https://github.com/saifmodan2006/swarscribe">View source <span aria-hidden="true">↗</span></a></footer>

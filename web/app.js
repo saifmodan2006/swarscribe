@@ -128,10 +128,17 @@ function toCodeJS(t) {
 function formatTranscript(raw, {code = false, style = ""} = {}) {
   if (code) return toCodeJS(raw.trim());
   const text = applyStyleJS(capitalise(smartFormatsJS(spokenPunctuation(removeFillers(selfCorrect(raw))))), style);
+  const list = text.match(/^first\s+(.+?)\s+second\s+(.+?)\s+third\s+(.+)$/i);
+  if (list) return list.slice(1).map(item => "- " + item.trim().replace(/[,.]$/, "")).join("\n");
   return text && /[a-z0-9]$/i.test(text) ? text + "." : text;
 }
 
-if (typeof module !== "undefined") module.exports = {formatTranscript, smartFormatsJS};
+function exampleReport(input, output, options) {
+  return JSON.stringify({input, output, mode: options.code ? "code" : "dictation",
+    style: options.style || "default"}, null, 2);
+}
+
+if (typeof module !== "undefined") module.exports = {formatTranscript, smartFormatsJS, exampleReport};
 
 function bindDemo() {
 const $ = id => document.getElementById(id);
@@ -139,6 +146,7 @@ const status = $("status");
 let sessionWords = 0, sessionEdits = 0;
 
 function clean(count = true) {
+  clearReport();
   const raw = $("input").value.trim();
   const t = formatTranscript(raw, {code:$("code").checked, style:$("style").value});
   $("output").value = t;
@@ -178,6 +186,38 @@ $("copy").addEventListener("click", async () => {
   try { await navigator.clipboard.writeText($("output").value); status.textContent = "Copied."; }
   catch { status.textContent = "Copy failed. Select and copy the output manually."; $("output").select(); }
 });
+
+const report = $("example-report");
+const reportStatus = $("example-status");
+$("copy-example").addEventListener("click", async () => {
+  const input = $("input").value.trim();
+  if (!input) {
+    report.hidden = true;
+    report.value = "";
+    reportStatus.textContent = "Enter a test phrase or choose an example first.";
+    return;
+  }
+  const options = {code: $("code").checked, style: $("style").value};
+  const reproduction = exampleReport(input, formatTranscript(input, options), options);
+  report.hidden = true;
+  report.value = "";
+  try {
+    await navigator.clipboard.writeText(reproduction);
+    reportStatus.textContent = "Test case copied. Add your expected output in the bug form.";
+  } catch {
+    report.value = reproduction;
+    report.hidden = false;
+    report.focus();
+    report.select();
+    reportStatus.textContent = "Copy this test case manually.";
+  }
+});
+function clearReport() {
+  report.hidden = true;
+  report.value = "";
+  reportStatus.textContent = "";
+}
+$("input").addEventListener("input", clearReport);
 
 document.querySelectorAll("[data-cmd]").forEach((btn) =>
   btn.addEventListener("click", () => {

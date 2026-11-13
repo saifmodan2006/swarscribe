@@ -1,10 +1,11 @@
-## What this changes
+## What changes for users?
 
-## Why
+Describe the behavior and why it matters. Link a related issue when there is one.
 
-## Checklist
+## Verification
 
-- [ ] Tests added or updated, and `python -m unittest discover -s tests` passes
-- [ ] Demo still runs: `python examples/demo.py`
-- [ ] No new required dependency (extras only, the core stays stdlib)
-- [ ] Nothing in this PR sends audio or text off the user's machine by default
+List the commands you ran and their results. For device checks, include the platform and version. For visual changes, attach a screenshot with sample data.
+
+## Data and dependencies
+
+If the change affects network requests, transcript storage, permissions, or dependencies, describe the impact and the default behavior.

@@ -1,6 +1,8 @@
 # SwarScribe
 
-SwarScribe is an offline-first dictation project for Windows, Android, and the command line. It includes a local dashboard and a [browser demo](https://saifmodan2006.github.io/swarscribe/web/). The project is **alpha**.
+SwarScribe is an offline-first dictation project for Windows, Android, and the command line. It includes a local dashboard and a browser studio. The project is **alpha**.
+
+[Try the studio](https://saifmodan2006.github.io/swarscribe/web/#try) · [Contribute](CONTRIBUTING.md) · [Report an issue](https://github.com/saifmodan2006/swarscribe/issues/new/choose) · [Roadmap](docs/ROADMAP.md)
 
 ## Quick start
 
@@ -80,4 +82,4 @@ gradle -p android testDebugUnitTest lintDebug assembleDebug assembleRelease asse
 
 The PyInstaller artifact is a text CLI. Use the Python installation for speech, dashboard, and tray. The Android Gradle build requires JDK 17, Gradle 8.9 and Android SDK 34. See [Android setup](android/README.md) for pairing and APK paths. The browser demo is plain HTML/CSS/JS, served from `web/` with shared assets at `assets/`. Run `python -m http.server 8080` at the repo root and open `/web/`.
 
-[Architecture](docs/ARCHITECTURE.md) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [MIT license](LICENSE)
+[Architecture](docs/ARCHITECTURE.md) · [Changelog](CHANGELOG.md) · [MIT license](LICENSE)
