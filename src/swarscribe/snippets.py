@@ -25,7 +25,7 @@ class SnippetLibrary:
         out = text
         for trigger, expansion in self.snippets.items():
             pat = re.compile(rf"\b{re.escape(trigger)}\b\.?", flags=re.I)
-            out = pat.sub(expansion, out)
+            out = pat.sub(lambda _: expansion, out)
         return out
 
     def triggers_in(self, text: str) -> list[str]:

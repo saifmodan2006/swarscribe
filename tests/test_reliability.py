@@ -84,6 +84,10 @@ class ProcessingTests(unittest.TestCase):
             self.assertEqual(analytics.summary()["sessions"], 2)
             self.assertTrue((Path(folder) / "history.json").exists())
 
+    def test_snippet_inserts_literal_backslashes(self):
+        config = Config(snippets={"my path": r"C:\users\name"})
+        self.assertEqual(process_dictation("my path", config), r"C:\users\name")
+
     def test_stream_silence_offsets_and_cancellation(self):
         output = Transcript("hello", "test", segments=(Segment(.1, .4, "hello"),))
         streamer = StreamingTranscriber(lambda _: output, sample_rate=1000, max_segment_ms=1000)
