@@ -9,7 +9,14 @@ transcript so the list grows with use.
 from __future__ import annotations
 
 import re
+import unicodedata
 from dataclasses import dataclass, field
+
+
+def _is_word_character(character: str) -> bool:
+    # Python's regex \w excludes combining marks such as Hindi vowel signs.
+    return (character.isalnum() or character == "_"
+            or unicodedata.category(character).startswith("M"))
 
 
 @dataclass
@@ -24,12 +31,23 @@ class PersonalDictionary:
 
     def apply(self, text: str) -> str:
         for heard, correct in self.entries.items():
-            pat = re.compile(rf"\b{re.escape(heard)}\b", flags=re.I)
-
-            def repl(m: re.Match, correct: str = correct) -> str:
-                return correct
-
-            text = pat.sub(repl, text)
+            if not heard:
+                continue
+            pat = re.compile(re.escape(heard), flags=re.I)
+            parts = []
+            previous_end = search_start = 0
+            while match := pat.search(text, search_start):
+                start, end = match.span()
+                if (start and _is_word_character(text[start - 1])) or (
+                    end < len(text) and _is_word_character(text[end])
+                ):
+                    # A rejected phrase may overlap a later whole-word match.
+                    search_start = start + 1
+                    continue
+                parts.extend((text[previous_end:start], correct))
+                previous_end = search_start = end
+            parts.append(text[previous_end:])
+            text = "".join(parts)
         return text
 
     def suggest(self, text: str) -> list[str]:
