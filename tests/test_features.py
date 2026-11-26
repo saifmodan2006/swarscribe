@@ -15,6 +15,44 @@ class TestDictionaryAndSnippets(unittest.TestCase):
         d = PersonalDictionary.default_for_saif()
         self.assertIn("devbysaif", d.apply("check devbysafe today"))
 
+    def test_dictionary_respects_unicode_word_boundaries(self):
+        cases = [
+            ("हिंदी", "Hindi", "हिंदी में लिखो", "Hindi में लिखो"),
+            ("हिंदी", "Hindi", "हिंदी, हिंदी!", "Hindi, Hindi!"),
+            ("हिंदी", "Hindi", "हिंदीकरण", "हिंदीकरण"),
+            ("हिंद", "India", "हिंदी", "हिंदी"),
+            ("द", "replacement", "हिंद", "हिंद"),
+            ("cafe", "coffee", "cafe\u0301", "cafe\u0301"),
+            ("cafe\u0301", "café", "cafe\u0301!", "café!"),
+            ("rag", "RAG", "rag RAG ragtime drag rag_1 1rag rag.",
+             "RAG RAG ragtime drag rag_1 1rag RAG."),
+            ("path", r"C:\users\name", "PATH", r"C:\users\name"),
+            ("remove", "", "remove!", "!"),
+        ]
+        for heard, correct, text, expected in cases:
+            with self.subTest(heard=heard, text=text):
+                dictionary = PersonalDictionary()
+                dictionary.add(heard, correct)
+                self.assertEqual(dictionary.apply(text), expected)
+
+    def test_dictionary_ignores_empty_heard_entry(self):
+        dictionary = PersonalDictionary()
+        dictionary.add("", "invalid")
+        dictionary.add("rag", "RAG")
+        self.assertEqual(dictionary.apply(""), "")
+        self.assertEqual(dictionary.apply("rag is useful"), "RAG is useful")
+
+    def test_dictionary_finds_overlapping_phrase_after_rejected_match(self):
+        dictionary = PersonalDictionary()
+        dictionary.add("a a", "replacement")
+        for text, expected in [
+            ("ba a a", "ba replacement"),
+            ("b\u0301a a a", "b\u0301a replacement"),
+            ("a a ab", "replacement ab"),
+        ]:
+            with self.subTest(text=text):
+                self.assertEqual(dictionary.apply(text), expected)
+
     def test_snippet_expands(self):
         lib = SnippetLibrary.defaults()
         out = lib.expand("See my portfolio for details.")
@@ -94,6 +132,13 @@ class TestAnalytics(unittest.TestCase):
 
 
 class TestPipeline(unittest.TestCase):
+    def test_hindi_dictionary_correction_in_pipeline(self):
+        dictionary = PersonalDictionary()
+        dictionary.add("हिंदी", "Hindi")
+        result = Pipeline(dictionary=dictionary).process("हिंदी में लिखो")
+        self.assertEqual(result.text, "Hindi में लिखो")
+        self.assertIn("dictionary", result.stages)
+
     def test_full_pipeline(self):
         pipe = Pipeline(dictionary=PersonalDictionary.default_for_saif(),
                         snippets=SnippetLibrary.defaults())
